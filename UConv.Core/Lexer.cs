@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UConv.Core
 {
@@ -55,7 +51,7 @@ namespace UConv.Core
         private int position = -1;
         private int len, saved = 0;
         private Nullable<char> current;
-        
+
         public ExprLexer(string content)
         {
             this.content = content;

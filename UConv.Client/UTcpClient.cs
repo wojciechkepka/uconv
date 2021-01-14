@@ -1,7 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.IO;
 using UConv.Core;
 
 namespace UConv.Client

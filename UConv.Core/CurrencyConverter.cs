@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using static UConv.Core.Units;
-using static UConv.Core.Formulas;
 
 namespace UConv.Core
 {

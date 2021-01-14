@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using static UConv.Core.Units;
 using static UConv.Core.Formulas;
+using static UConv.Core.Units;
 
 namespace UConv.Core
 {
@@ -67,7 +67,7 @@ namespace UConv.Core
             if (calculated)
             {
                 return new Tuple<double, Unit>(outVal, outUnit);
-            } 
+            }
             else
             {
                 throw new IncompatibleConversionUnits(inpUnit, outUnit);

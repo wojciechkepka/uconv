@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Windows;
+using System.Windows.Media;
+using UConv.Controls;
 using UConv.Core;
 using static UConv.Core.Units;
-using UConv.Controls;
-using System.Windows.Media;
-using System.Net;
 
 namespace UConv.Client
 {
@@ -84,6 +83,8 @@ namespace UConv.Client
                 return;
             }
 
+
+            client.ConvertRequest(convComboBox.SelectedItem.ToString(), inpUnitComboBox.SelectedItem.ToString(), outUnitComboBox.SelectedItem.ToString(), userInputBox.Text);
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using System.IO;
-using static UConv.Core.Units;
 using System.Runtime.Serialization;
-using System.Xml;
 using System.Text;
+using System.Xml;
+using static UConv.Core.Units;
 
 namespace UConv.Core
 {
@@ -21,7 +20,7 @@ namespace UConv.Core
     {
 
         public static T FromData<T>(string data)
-        where T: Message
+        where T : Message
         {
             DataContractSerializer ser = new DataContractSerializer(typeof(T), typeof(T).Name.ToString(), "");
             var sr = new StringReader(data);
@@ -30,7 +29,7 @@ namespace UConv.Core
         }
 
         public string ToXmlString<T>()
-        where T: Message
+        where T : Message
         {
             DataContractSerializer ser = new DataContractSerializer(typeof(T), typeof(T).Name.ToString(), "");
             var sw = new StringWriter();
@@ -40,7 +39,7 @@ namespace UConv.Core
         }
 
         public byte[] ToXmlBinary<T>()
-        where T: Message
+        where T : Message
         {
             return Encoding.ASCII.GetBytes(ToXmlString<T>());
         }

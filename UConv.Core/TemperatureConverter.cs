@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using static UConv.Core.Units;
 using static UConv.Core.Formulas;
+using static UConv.Core.Units;
 
 namespace UConv.Core
 {
@@ -62,7 +62,7 @@ namespace UConv.Core
                     }
                     break;
                 default:
-                throw new UnsupportedUnit(inpUnit);
+                    throw new UnsupportedUnit(inpUnit);
             }
 
             if (calculated)

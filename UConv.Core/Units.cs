@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace UConv.Core
 {
@@ -29,7 +27,8 @@ namespace UConv.Core
             if (format == TimeFormat.TwelveHour)
             {
                 return TimeFormat.TwentyFourHour;
-            } else
+            }
+            else
             {
                 return TimeFormat.TwelveHour;
             }

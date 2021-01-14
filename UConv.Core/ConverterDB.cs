@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace UConv.Core
 {
-    public partial class ConverterDBContext: DbContext
+    public partial class ConverterDBContext : DbContext
     {
         public ConverterDBContext()
         {

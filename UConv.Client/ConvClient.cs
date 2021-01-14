@@ -1,6 +1,6 @@
-﻿using UConv.Core;
+﻿using System;
 using System.Net.Sockets;
-using System;
+using UConv.Core;
 
 namespace UConv.Client
 {

@@ -28,11 +28,10 @@ namespace UConv.Client
             return client.GetStream();
         }
 
-        protected R writeRequest<T, R>(NetworkStream ns, string route, Request req)
-        where T : Request
-        where R : Response
+        protected string writeRequest<I>(NetworkStream ns, string route, Request req)
+        where I : Request
         {
-            var data = req.ToXmlBinary<T>();
+            var data = req.ToXmlBinary<I>();
             using (StreamReader reader = new StreamReader(ns))
             {
                 byte[] ro = Encoding.ASCII.GetBytes(route);
@@ -44,7 +43,7 @@ namespace UConv.Client
                 writer.Flush();
                 var resp = reader.ReadLine();
                 ns.Close();
-                return (R)Response.FromData<R>(resp);
+                return resp;
             }
         }
     }

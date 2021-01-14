@@ -57,7 +57,7 @@ namespace UConv.Core
             this.method = method;
         }
 
-        public static T FromData<T>(string data)
+        public new static T FromData<T>(string data)
         where T : Request
         {
             return Message.FromData<T>(data);
@@ -69,12 +69,27 @@ namespace UConv.Core
     public abstract class Response : Message
     {
         [DataMember]
-        public bool status;
-
-        public static T FromData<T>(string data)
+        public bool status { get; set; }
+        public Response(bool status)
+        {
+            this.status = status;
+        }
+        public new static T FromData<T>(string data)
         where T : Response
         {
             return Message.FromData<T>(data);
+        }
+    }
+
+    [DataContract]
+    public class ErrResponse : Response
+    {
+        [DataMember]
+        public string message { get; set; }
+
+        public ErrResponse(string message) : base(false)
+        {
+            this.message = message;
         }
     }
 
@@ -104,6 +119,11 @@ namespace UConv.Core
     {
         [DataMember]
         public string value;
+
+        public ConvResponse(string value) : base(true)
+        {
+            this.value = value;
+        }
     }
 
     [DataContract]
@@ -123,6 +143,11 @@ namespace UConv.Core
     {
         [DataMember]
         public Dictionary<String, Double> rates;
+
+        public ExchangeRateResponse(Dictionary<String, Double> rates) : base(true)
+        {
+            this.rates = rates;
+        }
     }
 
 
@@ -138,6 +163,11 @@ namespace UConv.Core
     {
         [DataMember]
         public Dictionary<string, List<Unit>> converters;
+
+        public ConvListResponse(Dictionary<string, List<Unit>> converters) : base(true)
+        {
+            this.converters = converters;
+        }
     }
 
 }

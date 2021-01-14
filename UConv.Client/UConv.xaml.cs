@@ -18,7 +18,7 @@ namespace UConv.Client
         public MainWindow()
         {
             InitializeComponent();
-            client = new ConvClient(Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString(), 7001);
+            client = new ConvClient(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString(), 7001);
             getConverters();
             convComboBox.ItemsSource = converters.Keys;
             userRateControl.UserRatingChanged += userRatingChangedHandler;
@@ -27,8 +27,14 @@ namespace UConv.Client
         private void getConverters()
         {
             var resp = client.ConverterListRequest();
-
-            converters = resp.converters;
+            if (typeof(ErrResponse) == resp.GetType())
+            {
+                setError(((ErrResponse)resp).message);
+            }
+            else
+            {
+                converters = ((ConvListResponse)resp).converters;
+            }
         }
 
         private void setMessage(string message)

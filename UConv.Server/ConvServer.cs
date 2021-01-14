@@ -45,7 +45,8 @@ namespace UConv.Server
                     data = convlResp.ToXmlBinary<ConvListResponse>();
                     break;
                 default:
-                    data = new byte[1];
+                    var resp = new ErrResponse($"Invalid route to `{path}`");
+                    data = resp.ToXmlBinary<Response>();
                     break;
             }
 
@@ -57,14 +58,14 @@ namespace UConv.Server
 
         public static void Main(string[] args)
         {
-            var addr = Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();
+            var addr = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
             var port = 7001;
             ConvServer server = new ConvServer(addr, port);
             Console.WriteLine($"Listening on {addr}:{port}");
             server.Listen();
         }
 
-        private ConvResponse convertMethod(ConvRequest request)
+        private Response convertMethod(ConvRequest request)
         {
             switch (request.converter)
             {
@@ -74,7 +75,7 @@ namespace UConv.Server
                         TimeFormatFromString(request.inputUnit),
                         TimeFormatFromString(request.outputUnit)
                     );
-                    return new ConvResponse { status = true, value = ret.Item1 };
+                    return new ConvResponse(ret.Item1);
                 default:
                     Double val = Double.Parse(request.value);
                     foreach (IConverter<double, Unit> iconv in converters)
@@ -87,20 +88,20 @@ namespace UConv.Server
                                 UnitFromString(request.outputUnit)
                              );
 
-                            return new ConvResponse { status = true, value = ret2.Item1.ToString() };
+                            return new ConvResponse(ret2.Item1.ToString());
                         }
                     }
                     break;
             }
-            return new ConvResponse { status = false, value = $"Converter {request.converter} not found." };
+            return new ErrResponse($"Converter {request.converter} not found.");
         }
 
-        private ExchangeRateResponse exchangeMethod(ExchangeRateRequest _)
+        private Response exchangeMethod(ExchangeRateRequest _)
         {
-            return new ExchangeRateResponse { status = false, rates = null };
+            return new ErrResponse("unimplemented");
         }
 
-        private ConvListResponse converterListMethod(Request _)
+        private Response converterListMethod(Request _)
         {
             var convs = new Dictionary<String, List<Unit>> { };
 
@@ -112,7 +113,7 @@ namespace UConv.Server
             // TODO: fixme
             convs.Add(tConv.Name, new List<Unit> { });
 
-            return new ConvListResponse { status = true, converters = convs };
+            return new ConvListResponse(convs);
         }
     }
 }

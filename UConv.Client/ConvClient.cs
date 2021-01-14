@@ -1,5 +1,6 @@
 ﻿using UConv.Core;
 using System.Net.Sockets;
+using System;
 
 namespace UConv.Client
 {
@@ -11,21 +12,35 @@ namespace UConv.Client
         ) : base(hostname, port)
         { }
 
-        public ConvResponse ConvertRequest(string converter, string inputUnit, string outputUnit, string value)
+        public Response ConvertRequest(string converter, string inputUnit, string outputUnit, string value)
         {
             using (NetworkStream ns = GetStream())
             {
-                var resp = writeRequest<ConvRequest, ConvResponse>(ns, "/convert", new ConvRequest(converter, inputUnit, outputUnit, value));
-                return resp;
+                var resp = writeRequest<ConvRequest>(ns, "/convert", new ConvRequest(converter, inputUnit, outputUnit, value));
+                try
+                {
+                    return (ConvResponse)Response.FromData<ConvResponse>(resp);
+                }
+                catch (Exception _)
+                {
+                    return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                }
             }
         }
 
-        public ConvListResponse ConverterListRequest()
+        public Response ConverterListRequest()
         {
             using (NetworkStream ns = GetStream())
             {
-                var resp = writeRequest<ConvListRequest, ConvListResponse>(ns, "/converters", new ConvListRequest());
-                return resp;
+                var resp = writeRequest<ConvListRequest>(ns, "/converters", new ConvListRequest());
+                try
+                {
+                    return (ConvListResponse)Response.FromData<ConvListResponse>(resp);
+                }
+                catch (Exception _)
+                {
+                    return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                }
             }
         }
     }

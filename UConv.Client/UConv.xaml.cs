@@ -5,6 +5,7 @@ using UConv.Core;
 using static UConv.Core.Units;
 using UConv.Controls;
 using System.Windows.Media;
+using System.Net;
 
 namespace UConv.Client
 {
@@ -17,9 +18,9 @@ namespace UConv.Client
         public MainWindow()
         {
             InitializeComponent();
-            client = new ConvClient("localhost", 3693);
+            client = new ConvClient(Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString(), 7001);
             getConverters();
-            convComboBox.ItemsSource = converters;
+            convComboBox.ItemsSource = converters.Keys;
             userRateControl.UserRatingChanged += userRatingChangedHandler;
         }
 
@@ -45,8 +46,8 @@ namespace UConv.Client
         private void convComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             var conv = convComboBox.SelectedItem.ToString();
-            inpUnitComboBox.ItemsSource = converters[conv];
-            outUnitComboBox.ItemsSource = converters[conv];
+            inpUnitComboBox.ItemsSource = converters.GetValueOrDefault(conv);
+            outUnitComboBox.ItemsSource = converters.GetValueOrDefault(conv);
         }
 
         private void userRatingChangedHandler(object sender, UserRate.UserRatingEventArgs args)

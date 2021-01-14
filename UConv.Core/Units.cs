@@ -34,6 +34,7 @@ namespace UConv.Core
                 return TimeFormat.TwelveHour;
             }
         }
+
         public enum Unit
         {
             Celsius,

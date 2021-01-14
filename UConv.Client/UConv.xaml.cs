@@ -3,33 +3,80 @@ using System.Collections.Generic;
 using System.Windows;
 using UConv.Core;
 using static UConv.Core.Units;
+using UConv.Controls;
+using System.Windows.Media;
 
 namespace UConv.Client
 {
     public partial class MainWindow : Window
     {
-        List<IConverter<double, Unit>> converters = new List<IConverter<double, Unit>>
-            {
-                new DistanceConverter(),
-                new MassConverter(),
-                new TemperatureConverter(),
-                new SpeedConverter(),
-            };
-        TimeConverter tConv = new TimeConverter();
-        bool timeConversion = false;
-        double hours; double minutes;
-        const int MaxRecordsPerPage = 20;
-        List<string> converterNames = new List<string>() {
-                "Distance",
-                "Mass",
-                "Temperature",
-                "Speed",
-                "Time",
-        };
+        ConvClient client;
+
+        Dictionary<string, List<Unit>> converters;
+
         public MainWindow()
         {
             InitializeComponent();
+            client = new ConvClient("localhost", 3693);
+            getConverters();
+            convComboBox.ItemsSource = converters;
+            userRateControl.UserRatingChanged += userRatingChangedHandler;
         }
 
+        private void getConverters()
+        {
+            var resp = client.ConverterListRequest();
+
+            converters = resp.converters;
+        }
+
+        private void setMessage(string message)
+        {
+            outputTextBlock.Foreground = Brushes.Black;
+            outputTextBlock.Text = message;
+        }
+
+        private void setError(string message)
+        {
+            setMessage(message);
+            outputTextBlock.Foreground = Brushes.Red;
+        }
+
+        private void convComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var conv = convComboBox.SelectedItem.ToString();
+            inpUnitComboBox.ItemsSource = converters[conv];
+            outUnitComboBox.ItemsSource = converters[conv];
+        }
+
+        private void userRatingChangedHandler(object sender, UserRate.UserRatingEventArgs args)
+        {
+
+        }
+
+        private void convertButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (convComboBox.SelectedIndex < 0)
+            {
+                setError("Converter not selected");
+                return;
+            }
+            if (inpUnitComboBox.SelectedIndex < 0)
+            {
+                setError("Input unit not selected");
+                return;
+            }
+            if (outUnitComboBox.SelectedIndex < 0)
+            {
+                setError("Output unit not selected");
+                return;
+            }
+            if (userInputBox.Text == "")
+            {
+                setError("Input box is empty");
+                return;
+            }
+
+        }
     }
 }

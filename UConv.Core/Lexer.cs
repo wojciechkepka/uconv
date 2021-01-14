@@ -19,6 +19,7 @@ namespace UConv.Core
         Minus,
         LBracket,
         RBracket,
+        Semi,
     }
 
     public class Token
@@ -113,7 +114,7 @@ namespace UConv.Core
                 ch = peekByte();
                 if (!ch.HasValue) break;
 
-                if (ch.Value == ' ' || ch.Value == '\t' || ch.Value == '\n' || ch.Value == '\r') break;
+                if (ch.Value == ' ' || ch.Value == '\t' || ch.Value == '\n' || ch.Value == '\r' || ch.Value == ';') break;
                 num += ch.Value;
                 nextByte();
             }
@@ -171,6 +172,8 @@ namespace UConv.Core
                         return new Token(TokenType.RBracket);
                     case '*':
                         return new Token(TokenType.Asterisk);
+                    case ';':
+                        return new Token(TokenType.Semi);
                     default:
                         if (Char.IsDigit(ch.Value))
                         {

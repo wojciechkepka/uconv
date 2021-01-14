@@ -4,7 +4,6 @@ using UConv.Core;
 
 namespace UConv.Tests
 {
-
     [TestClass]
     public class ExprParserTests
     {
@@ -63,7 +62,7 @@ namespace UConv.Tests
         [TestMethod]
         public void LexesNumOperations()
         {
-            string inp = "x = 42.0 + 15.9";
+            string inp = "x = 42.0 + 15.9;";
             ExprLexer l = new ExprLexer(inp);
 
             Token got = l.NextToken();
@@ -85,6 +84,10 @@ namespace UConv.Tests
             got = l.NextToken();
             Assert.IsNotNull(got);
             Assert.AreEqual(15.9, ((NumToken)got).Number);
+
+            got = l.NextToken();
+            Assert.IsNotNull(got);
+            Assert.IsTrue(got.Type == TokenType.Semi);
         }
     }
 }

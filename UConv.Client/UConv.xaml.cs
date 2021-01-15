@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Windows;
 using System.Windows.Media;
@@ -57,7 +58,22 @@ namespace UConv.Client
 
         private void userRatingChangedHandler(object sender, UserRate.UserRatingEventArgs args)
         {
-
+            try
+            {
+                var resp = client.RateMeRequest(Dns.GetHostName(), args.Rating);
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    setError(((ErrResponse)resp).message);
+                }
+                else
+                {
+                    userRateControl.SetColor(args.Rating);
+                }
+            }
+            catch (Exception ex)
+            {
+                setError(ex.Message);
+            }
         }
 
         private void convertButton_Click(object sender, RoutedEventArgs e)
@@ -83,8 +99,23 @@ namespace UConv.Client
                 return;
             }
 
-
-            client.ConvertRequest(convComboBox.SelectedItem.ToString(), inpUnitComboBox.SelectedItem.ToString(), outUnitComboBox.SelectedItem.ToString(), userInputBox.Text);
+            try
+            {
+                var resp = client.ConvertRequest(convComboBox.SelectedItem.ToString(), inpUnitComboBox.SelectedItem.ToString(), outUnitComboBox.SelectedItem.ToString(), userInputBox.Text);
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    setError(((ErrResponse)resp).message);
+                }
+                else
+                {
+                    ConvResponse r = (ConvResponse)resp;
+                    setMessage($"{r.value} {UnitSymbol((Unit)outUnitComboBox.SelectedItem)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                setError(ex.Message);
+            }
         }
     }
 }

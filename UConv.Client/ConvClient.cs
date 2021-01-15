@@ -10,10 +10,12 @@ namespace UConv.Client
             string hostname,
             int port
         ) : base(hostname, port)
-        { }
+        {
+        }
 
         public Response ConvertRequest(string converter, string inputUnit, string outputUnit, string value)
         {
+            Connect();
             using (NetworkStream ns = GetStream())
             {
                 var resp = writeRequest<ConvRequest>(ns, "/convert", new ConvRequest(converter, inputUnit, outputUnit, value));
@@ -23,13 +25,21 @@ namespace UConv.Client
                 }
                 catch (Exception _)
                 {
-                    return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                    try
+                    {
+                        return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidResponse(ex.Message, resp);
+                    }
                 }
             }
         }
 
         public Response ConverterListRequest()
         {
+            Connect();
             using (NetworkStream ns = GetStream())
             {
                 var resp = writeRequest<ConvListRequest>(ns, "/converters", new ConvListRequest());
@@ -39,7 +49,38 @@ namespace UConv.Client
                 }
                 catch (Exception _)
                 {
-                    return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                    try
+                    {
+                        return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidResponse(ex.Message, resp);
+                    }
+                }
+            }
+        }
+
+        public Response RateMeRequest(string hostname, int rating)
+        {
+            Connect();
+            using (NetworkStream ns = GetStream())
+            {
+                var resp = writeRequest<RateMeRequest>(ns, "/rateme", new RateMeRequest(hostname, rating));
+                try
+                {
+                    return (RateMeResponse)Response.FromData<RateMeResponse>(resp);
+                }
+                catch (Exception _)
+                {
+                    try
+                    {
+                        return (ErrResponse)Response.FromData<ErrResponse>(resp);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidResponse(ex.Message, resp);
+                    }
                 }
             }
         }

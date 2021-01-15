@@ -101,6 +101,8 @@ namespace UConv.Server
             {
                 _OnHandleConnection.Invoke(ns);
             }
+            connection.Client.Close();
+            connection.Close();
         }
 
         // Do nadpisania przez nadrzędną klasę

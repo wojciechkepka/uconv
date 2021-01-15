@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using UConv.Core;
 
 namespace UConv.Client
@@ -10,7 +11,7 @@ namespace UConv.Client
     {
         protected readonly string Hostname;
         protected readonly int Port;
-        protected readonly TcpClient client;
+        protected TcpClient client;
 
         public UTcpClient(
             string hostname,
@@ -22,9 +23,13 @@ namespace UConv.Client
             client = new TcpClient();
         }
 
-        protected NetworkStream GetStream()
+        protected void Connect()
         {
             client.Connect(Hostname, Port);
+        }
+
+        protected NetworkStream GetStream()
+        {
             return client.GetStream();
         }
 
@@ -39,10 +44,13 @@ namespace UConv.Client
                 Buffer.BlockCopy(ro, 0, payload, 0, ro.Length);
                 Buffer.BlockCopy(data, 0, payload, ro.Length, data.Length);
                 var writer = new StreamWriter(ns);
+                writer.AutoFlush = true;
+
                 writer.WriteLine(Encoding.ASCII.GetString(payload));
-                writer.Flush();
                 var resp = reader.ReadLine();
                 ns.Close();
+                client.Dispose();
+                client = new TcpClient();
                 return resp;
             }
         }

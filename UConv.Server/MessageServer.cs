@@ -25,22 +25,19 @@ namespace UConv.Server
             var isOk = ns.CanRead && ns.CanWrite;
             if (!isOk) return;
             var reader = new StreamReader(ns);
-            while (!ExitSignal)
+            string data;
+
+            try
             {
-                string data;
-
-                try
-                {
-                    data = reader.ReadLine();
-                }
-                catch (IOException ex)
-                {
-                    _ = ex;
-                    return;
-                }
-
-                OnMessage.Invoke(ns, data);
+                data = reader.ReadLine();
             }
+            catch (IOException ex)
+            {
+                _ = ex;
+                return;
+            }
+
+            OnMessage.Invoke(ns, data);
         }
 
         // Do nadpisania przed nadrzędną klasę

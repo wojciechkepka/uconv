@@ -4,12 +4,13 @@ using System.Windows.Input;
 
 namespace UConv.Controls
 {
-    /// <summary>
-    /// Interaction logic for UserRate.xaml
-    /// </summary>
     public partial class UserRate : UserControl
     {
+        private readonly Tuple<byte, byte, byte, byte> Gold = new Tuple<byte, byte, byte, byte>(0xFF, 0xFF, 0xD7, 0x00);
+
+        public event EventHandler<UserRatingEventArgs> UserRatingChanged;
         public int userRating = 0;
+        
         public UserRate()
         {
             InitializeComponent();
@@ -18,8 +19,6 @@ namespace UConv.Controls
                 b.StarClick += new EventHandler(StarButton_Click);
             }
         }
-
-        public event EventHandler<UserRatingEventArgs> UserRatingChanged;
 
         public class UserRatingEventArgs : EventArgs
         {
@@ -30,27 +29,39 @@ namespace UConv.Controls
             }
         }
 
-        private void StarButton_MouseEnter(object sender, MouseEventArgs e)
+        public void ResetColor()
         {
-            var col = ((StarButton)sender).GetValue(Grid.ColumnProperty);
-            int i = 0;
             foreach (StarButton b in starGrid.Children)
             {
-                if (i <= (int)col)
+                b.DefaultFill();
+            }
+        }
+
+        public void SetColor(int n)
+        {
+            int i = 1;
+            foreach (StarButton b in starGrid.Children)
+            {
+                if (i <= n)
                 {
-                    b.Fill = new Tuple<byte, byte, byte, byte>(0xFF, 0xFF, 0xD7, 0x00);
+                    b.Fill = Gold;
                 }
                 i++;
             }
         }
 
+        private void StarButton_MouseEnter(object sender, MouseEventArgs e)
+        {
+            ResetColor();
+            var col = ((StarButton)sender).GetValue(Grid.ColumnProperty);
+            int i = 0;
+            SetColor((int)col + 1);
+        }
+
         private void StarButton_MouseLeave(object sender, MouseEventArgs e)
         {
-            foreach (StarButton b in starGrid.Children)
-            {
-
-                b.DefaultFill();
-            }
+            ResetColor();
+            SetColor(userRating);
         }
 
         private void StarButton_Click(object sender, EventArgs e)

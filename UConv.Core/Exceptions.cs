@@ -33,4 +33,11 @@ namespace UConv.Core
             : base($"Error with database: {message}")
         { }
     }
+
+    public class InvalidResponse : Exception
+    {
+        public InvalidResponse(string reason, string data)
+            : base($"Error while reading response from server - {reason}, data = `{data}`")
+        { }
+    }
 }

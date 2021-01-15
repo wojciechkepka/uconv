@@ -12,14 +12,16 @@ namespace UConv.Core
     {
         ConverterList,
         Convert,
-        ExchangeRate
+        ExchangeRate,
+        SaveRating,
+        LastRating,
     }
 
     [DataContract]
     public abstract class Message
     {
 
-        public static T FromData<T>(string data)
+        public static T FromData<T>(String data)
         where T : Message
         {
             DataContractSerializer ser = new DataContractSerializer(typeof(T), typeof(T).Name.ToString(), "");
@@ -28,7 +30,7 @@ namespace UConv.Core
             return (T)ser.ReadObject(xr);
         }
 
-        public string ToXmlString<T>()
+        public String ToXmlString<T>()
         where T : Message
         {
             DataContractSerializer ser = new DataContractSerializer(typeof(T), typeof(T).Name.ToString(), "");
@@ -56,7 +58,7 @@ namespace UConv.Core
             this.method = method;
         }
 
-        public new static T FromData<T>(string data)
+        public new static T FromData<T>(String data)
         where T : Request
         {
             return Message.FromData<T>(data);
@@ -67,13 +69,12 @@ namespace UConv.Core
     [DataContract]
     public abstract class Response : Message
     {
-        [DataMember]
         public bool status { get; set; }
         public Response(bool status)
         {
             this.status = status;
         }
-        public new static T FromData<T>(string data)
+        public new static T FromData<T>(String data)
         where T : Response
         {
             return Message.FromData<T>(data);
@@ -83,10 +84,9 @@ namespace UConv.Core
     [DataContract]
     public class ErrResponse : Response
     {
-        [DataMember]
-        public string message { get; set; }
+        public String message { get; set; }
 
-        public ErrResponse(string message) : base(false)
+        public ErrResponse(String message) : base(false)
         {
             this.message = message;
         }
@@ -95,13 +95,9 @@ namespace UConv.Core
     [DataContract]
     public class ConvRequest : Request
     {
-        [DataMember]
         public String converter;
-        [DataMember]
         public String inputUnit;
-        [DataMember]
         public String outputUnit;
-        [DataMember]
         public String value;
 
         public ConvRequest(String converter, String inputUnit, String outputUnit, String value) : base(Method.Convert)
@@ -116,10 +112,9 @@ namespace UConv.Core
     [DataContract]
     public class ConvResponse : Response
     {
-        [DataMember]
-        public string value;
+        public String value;
 
-        public ConvResponse(string value) : base(true)
+        public ConvResponse(String value) : base(true)
         {
             this.value = value;
         }
@@ -128,7 +123,6 @@ namespace UConv.Core
     [DataContract]
     public class ExchangeRateRequest : Request
     {
-        [DataMember]
         public String currency;
 
         public ExchangeRateRequest(String currency) : base(Method.ExchangeRate)
@@ -169,5 +163,53 @@ namespace UConv.Core
         }
     }
 
+    [DataContract]
+    public class RateMeRequest : Request
+    {
+        public string hostname;
+        public int rating;
+
+        public RateMeRequest(string hostname, int rating) : base(Method.SaveRating)
+        {
+            this.hostname = hostname;
+            this.rating = rating;
+        }
+    }
+
+
+    [DataContract]
+    public class RateMeResponse : Response
+    {
+        public RateMeResponse() : base(true)
+        {
+        }
+    }
+
+    [DataContract]
+    public class LastRatingRequest : Request
+    {
+        public string hostname;
+
+        public LastRatingRequest(string hostname) : base(Method.LastRating)
+        {
+            this.hostname = hostname;
+        }
+    }
+
+    [DataContract]
+    public class LastRatingResponse : Response
+    {
+        public DateTime date;
+        public string hostname;
+        public int rating;
+
+
+        public LastRatingResponse(DateTime date, String hostname, int rating) : base(true)
+        {
+            this.date = date;
+            this.hostname = hostname;
+            this.rating = rating;
+        }
+    }
 }
 

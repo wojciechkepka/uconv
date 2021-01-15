@@ -44,16 +44,22 @@ namespace UConv.Server
                     var convlResp = converterListMethod(convlReq);
                     data = convlResp.ToXmlBinary<ConvListResponse>();
                     break;
+                case "/rateme":
+                    var rateReq = Request.FromData<RateMeRequest>(message);
+                    var rateResp = rateMeMethod(rateReq);
+                    data = rateResp.ToXmlBinary<RateMeResponse>();
+                    break;
                 default:
                     var resp = new ErrResponse($"Invalid route to `{path}`");
                     data = resp.ToXmlBinary<Response>();
                     break;
             }
 
-            var writer = new StreamWriter(ns);
+            var writer = new StreamWriter(ns)
+            {
+                AutoFlush = true
+            };
             writer.WriteLine(Encoding.ASCII.GetString(data));
-            writer.Flush();
-            ExitSignal = true;
         }
 
         public static void Main(string[] args)
@@ -114,6 +120,12 @@ namespace UConv.Server
             convs.Add(tConv.Name, new List<Unit> { });
 
             return new ConvListResponse(convs);
+        }
+
+        private Response rateMeMethod(RateMeRequest request)
+        {
+            // Save rating to db
+            return new RateMeResponse();
         }
     }
 }

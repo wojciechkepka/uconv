@@ -8,20 +8,20 @@ namespace UConv.Core
     public class MassConverter : IConverter<double, Unit>
     {
         public string Name => "Mass";
-        public List<Unit> SupportedUnits => new List<Unit>() {
+
+        public List<Unit> SupportedUnits => new()
+        {
             Unit.Kilograms,
             Unit.Pounds,
-            Unit.Ounces,
+            Unit.Ounces
         };
+
         public Tuple<double, Unit> Convert(double val, Unit inpUnit, Unit outUnit)
         {
-            if (inpUnit == outUnit)
-            {
-                return new Tuple<double, Unit>(val, outUnit);
-            }
+            if (inpUnit == outUnit) return new Tuple<double, Unit>(val, outUnit);
 
             double outVal = 0;
-            bool calculated = false;
+            var calculated = false;
 
             switch (inpUnit)
             {
@@ -36,6 +36,7 @@ namespace UConv.Core
                         outVal = KilogramsToOunces(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.Pounds:
                     if (outUnit == Unit.Kilograms)
@@ -48,6 +49,7 @@ namespace UConv.Core
                         outVal = PoundsToOunces(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.Ounces:
                     if (outUnit == Unit.Kilograms)
@@ -60,18 +62,15 @@ namespace UConv.Core
                         outVal = OuncesToPounds(val);
                         calculated = true;
                     }
+
                     break;
                 default:
                     throw new UnsupportedUnit(inpUnit);
             }
+
             if (calculated)
-            {
                 return new Tuple<double, Unit>(outVal, outUnit);
-            }
-            else
-            {
-                throw new IncompatibleConversionUnits(inpUnit, outUnit);
-            }
+            throw new IncompatibleConversionUnits(inpUnit, outUnit);
         }
     }
 }

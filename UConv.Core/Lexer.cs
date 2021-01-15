@@ -1,8 +1,5 @@
-﻿using System;
-
-namespace UConv.Core
+﻿namespace UConv.Core
 {
-
     public enum TokenType
     {
         Ident,
@@ -15,49 +12,54 @@ namespace UConv.Core
         Minus,
         LBracket,
         RBracket,
-        Semi,
+        Semi
     }
 
     public class Token
     {
-        public TokenType Type { get; set; }
         public Token(TokenType ty)
         {
             Type = ty;
         }
+
+        public TokenType Type { get; set; }
     }
 
     public class IdentToken : Token
     {
-        public string Identifier { get; set; }
         public IdentToken(string ident) : base(TokenType.Ident)
         {
             Identifier = ident;
         }
+
+        public string Identifier { get; set; }
     }
 
     public class NumToken : Token
     {
-        public double Number { get; set; }
         public NumToken(double num) : base(TokenType.Num)
         {
             Number = num;
         }
+
+        public double Number { get; set; }
     }
 
     public class ExprLexer
     {
-        private string content { get; set; }
+        private char? current;
+        private readonly int len;
+        private int saved;
         private int position = -1;
-        private int len, saved = 0;
-        private Nullable<char> current;
 
         public ExprLexer(string content)
         {
             this.content = content;
-            this.len = content.Length;
-            this.current = null;
+            len = content.Length;
+            current = null;
         }
+
+        private string content { get; }
 
         private void savePosition()
         {
@@ -69,17 +71,14 @@ namespace UConv.Core
             position = saved;
         }
 
-        private Nullable<char> peekByte()
+        private char? peekByte()
         {
-            if (position < len - 1)
-            {
-                return content[position + 1];
-            }
+            if (position < len - 1) return content[position + 1];
 
             return null;
         }
 
-        private Nullable<char> nextByte()
+        private char? nextByte()
         {
             if (position < len - 1)
             {
@@ -91,7 +90,7 @@ namespace UConv.Core
             return null;
         }
 
-        private Nullable<char> currByte()
+        private char? currByte()
         {
             return current;
         }
@@ -99,8 +98,8 @@ namespace UConv.Core
         private Token parseNumToken()
         {
             savePosition();
-            string num = "";
-            Nullable<char> ch = currByte();
+            var num = "";
+            var ch = currByte();
 
             if (!ch.HasValue) return null;
             num += ch.Value;
@@ -110,19 +109,20 @@ namespace UConv.Core
                 ch = peekByte();
                 if (!ch.HasValue) break;
 
-                if (ch.Value == ' ' || ch.Value == '\t' || ch.Value == '\n' || ch.Value == '\r' || ch.Value == ';') break;
+                if (ch.Value == ' ' || ch.Value == '\t' || ch.Value == '\n' || ch.Value == '\r' ||
+                    ch.Value == ';') break;
                 num += ch.Value;
                 nextByte();
             }
 
-            return new NumToken(Double.Parse(num));
+            return new NumToken(double.Parse(num));
         }
 
         private Token parseIdentToken()
         {
             savePosition();
-            string ident = "";
-            Nullable<char> ch = currByte();
+            var ident = "";
+            var ch = currByte();
 
             if (!ch.HasValue) return null;
             ident += ch.Value;
@@ -142,9 +142,8 @@ namespace UConv.Core
 
         public Token NextToken()
         {
-            Nullable<char> ch = nextByte();
+            var ch = nextByte();
             while (true)
-            {
                 switch (ch)
                 {
                     case null:
@@ -171,19 +170,11 @@ namespace UConv.Core
                     case ';':
                         return new Token(TokenType.Semi);
                     default:
-                        if (Char.IsDigit(ch.Value))
-                        {
+                        if (char.IsDigit(ch.Value))
                             return parseNumToken();
-                        }
                         else
-                        {
                             return parseIdentToken();
-                        }
                 }
-            }
-
         }
     }
-
-
 }

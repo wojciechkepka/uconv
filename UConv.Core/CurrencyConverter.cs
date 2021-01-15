@@ -7,7 +7,9 @@ namespace UConv.Core
     public class CurrencyConverter : IConverter<double, Unit>
     {
         public string Name => "Currency";
-        public List<Unit> SupportedUnits => new List<Unit>() {
+
+        public List<Unit> SupportedUnits => new()
+        {
             Unit.RUB,
             Unit.PLN,
             Unit.EUR,
@@ -17,14 +19,12 @@ namespace UConv.Core
             Unit.JPY,
             Unit.GBP,
             Unit.BGN,
-            Unit.ZAR,
+            Unit.ZAR
         };
+
         public Tuple<double, Unit> Convert(double val, Unit inpUnit, Unit outUnit)
         {
-            if (inpUnit == outUnit)
-            {
-                return new Tuple<double, Unit>(val, outUnit);
-            }
+            if (inpUnit == outUnit) return new Tuple<double, Unit>(val, outUnit);
 
             double outVal = 0;
 

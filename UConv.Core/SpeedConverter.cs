@@ -8,21 +8,21 @@ namespace UConv.Core
     public class SpeedConverter : IConverter<double, Unit>
     {
         public string Name => "Speed";
-        public List<Unit> SupportedUnits => new List<Unit>() {
+
+        public List<Unit> SupportedUnits => new()
+        {
             Unit.KilometersPerHour,
             Unit.MetersPerSecond,
             Unit.MilesPerHour,
             Unit.Knots
         };
+
         public Tuple<double, Unit> Convert(double val, Unit inpUnit, Unit outUnit)
         {
-            if (inpUnit == outUnit)
-            {
-                return new Tuple<double, Unit>(val, outUnit);
-            }
+            if (inpUnit == outUnit) return new Tuple<double, Unit>(val, outUnit);
 
             double outVal = 0;
-            bool calculated = false;
+            var calculated = false;
 
             switch (inpUnit)
             {
@@ -42,6 +42,7 @@ namespace UConv.Core
                         outVal = KphToMps(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.MilesPerHour:
                     if (outUnit == Unit.KilometersPerHour)
@@ -59,6 +60,7 @@ namespace UConv.Core
                         outVal = MphToMps(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.Knots:
                     if (outUnit == Unit.MilesPerHour)
@@ -76,6 +78,7 @@ namespace UConv.Core
                         outVal = KnotsToMps(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.MetersPerSecond:
                     if (outUnit == Unit.MilesPerHour)
@@ -93,19 +96,15 @@ namespace UConv.Core
                         outVal = MpsToKnots(val);
                         calculated = true;
                     }
+
                     break;
                 default:
                     throw new UnsupportedUnit(inpUnit);
             }
 
             if (calculated)
-            {
                 return new Tuple<double, Unit>(outVal, outUnit);
-            }
-            else
-            {
-                throw new IncompatibleConversionUnits(inpUnit, outUnit);
-            }
+            throw new IncompatibleConversionUnits(inpUnit, outUnit);
         }
     }
 }

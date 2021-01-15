@@ -5,12 +5,12 @@ using System.Windows.Media;
 namespace UConv.Controls
 {
     /// <summary>
-    /// Interaction logic for StarButton.xaml
+    ///     Interaction logic for StarButton.xaml
     /// </summary>
     public partial class StarButton : UserControl
     {
-        public event EventHandler StarClick;
         private Tuple<byte, byte, byte, byte> fill;
+
         public StarButton()
         {
             InitializeComponent();
@@ -19,15 +19,17 @@ namespace UConv.Controls
 
         public Tuple<byte, byte, byte, byte> Fill
         {
-            get { return fill; }
+            get => fill;
             set
             {
-                this.fill = value;
+                fill = value;
                 var brush = new SolidColorBrush();
                 brush.Color = Color.FromArgb(fill.Item1, fill.Item2, fill.Item3, fill.Item4);
                 starPath.Fill = brush;
             }
         }
+
+        public event EventHandler StarClick;
 
         public void DefaultFill()
         {

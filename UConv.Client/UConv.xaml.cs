@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using UConv.Controls;
 using UConv.Core;
@@ -11,9 +12,9 @@ namespace UConv.Client
 {
     public partial class MainWindow : Window
     {
-        ConvClient client;
+        private readonly ConvClient client;
 
-        Dictionary<string, List<Unit>> converters;
+        private Dictionary<string, List<Unit>> converters;
 
         public MainWindow()
         {
@@ -28,13 +29,9 @@ namespace UConv.Client
         {
             var resp = client.ConverterListRequest();
             if (typeof(ErrResponse) == resp.GetType())
-            {
-                setError(((ErrResponse)resp).message);
-            }
+                setError(((ErrResponse) resp).message);
             else
-            {
-                converters = ((ConvListResponse)resp).converters;
-            }
+                converters = ((ConvListResponse) resp).converters;
         }
 
         private void setMessage(string message)
@@ -49,7 +46,7 @@ namespace UConv.Client
             outputTextBlock.Foreground = Brushes.Red;
         }
 
-        private void convComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void convComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var conv = convComboBox.SelectedItem.ToString();
             inpUnitComboBox.ItemsSource = converters.GetValueOrDefault(conv);
@@ -62,13 +59,9 @@ namespace UConv.Client
             {
                 var resp = client.RateMeRequest(Dns.GetHostName(), args.Rating);
                 if (typeof(ErrResponse) == resp.GetType())
-                {
-                    setError(((ErrResponse)resp).message);
-                }
+                    setError(((ErrResponse) resp).message);
                 else
-                {
                     userRateControl.SetColor(args.Rating);
-                }
             }
             catch (Exception ex)
             {
@@ -83,16 +76,19 @@ namespace UConv.Client
                 setError("Converter not selected");
                 return;
             }
+
             if (inpUnitComboBox.SelectedIndex < 0)
             {
                 setError("Input unit not selected");
                 return;
             }
+
             if (outUnitComboBox.SelectedIndex < 0)
             {
                 setError("Output unit not selected");
                 return;
             }
+
             if (userInputBox.Text == "")
             {
                 setError("Input box is empty");
@@ -101,15 +97,17 @@ namespace UConv.Client
 
             try
             {
-                var resp = client.ConvertRequest(convComboBox.SelectedItem.ToString(), inpUnitComboBox.SelectedItem.ToString(), outUnitComboBox.SelectedItem.ToString(), userInputBox.Text);
+                var resp = client.ConvertRequest(convComboBox.SelectedItem.ToString(),
+                    inpUnitComboBox.SelectedItem.ToString(), outUnitComboBox.SelectedItem.ToString(),
+                    userInputBox.Text);
                 if (typeof(ErrResponse) == resp.GetType())
                 {
-                    setError(((ErrResponse)resp).message);
+                    setError(((ErrResponse) resp).message);
                 }
                 else
                 {
-                    ConvResponse r = (ConvResponse)resp;
-                    setMessage($"{r.value} {UnitSymbol((Unit)outUnitComboBox.SelectedItem)}");
+                    var r = (ConvResponse) resp;
+                    setMessage($"{r.value} {UnitSymbol((Unit) outUnitComboBox.SelectedItem)}");
                 }
             }
             catch (Exception ex)

@@ -8,12 +8,6 @@ namespace UConv.Core
 {
     public abstract class SocketEntity
     {
-        public IPHostEntry host { get; set; }
-        public IPAddress addr { get; set; }
-        public IPEndPoint endpoint { get; set; }
-        public Socket socket { get; set; }
-        public int port { get; set; }
-
         public SocketEntity(string hostname, int port)
         {
             host = Dns.GetHostEntry(hostname);
@@ -23,14 +17,19 @@ namespace UConv.Core
             socket = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
 
+        public IPHostEntry host { get; set; }
+        public IPAddress addr { get; set; }
+        public IPEndPoint endpoint { get; set; }
+        public Socket socket { get; set; }
+        public int port { get; set; }
+
         public static byte[] ReadBytes(Socket socket)
         {
             int bufSize = 1024, total = 0, size = bufSize;
-            byte[] bytes = new byte[size];
-            byte[] buf = new byte[bufSize];
+            var bytes = new byte[size];
+            var buf = new byte[bufSize];
             int received;
             while (true)
-            {
                 try
                 {
                     received = socket.Receive(buf);
@@ -44,27 +43,22 @@ namespace UConv.Core
                         Array.Resize(ref bytes, size);
                     }
 
-                    for (int i = 0; i < bufSize; i++)
-                    {
-                        bytes[total + i] = buf[i];
-                    }
+                    for (var i = 0; i < bufSize; i++) bytes[total + i] = buf[i];
 
                     total += received;
                 }
                 catch (SocketException)
                 {
-
                 }
-            }
 
             return bytes.Take(total).ToArray();
         }
 
         public static void WriteBytes(Socket socket, string route, byte[] bytes)
         {
-            byte[] ro = Encoding.ASCII.GetBytes(route);
-            byte[] eof = Encoding.ASCII.GetBytes("<EOF>");
-            byte[] payload = new byte[ro.Length + bytes.Length + eof.Length];
+            var ro = Encoding.ASCII.GetBytes(route);
+            var eof = Encoding.ASCII.GetBytes("<EOF>");
+            var payload = new byte[ro.Length + bytes.Length + eof.Length];
             Buffer.BlockCopy(ro, 0, payload, 0, ro.Length);
             Buffer.BlockCopy(bytes, 0, payload, ro.Length, bytes.Length);
             Buffer.BlockCopy(eof, 0, payload, ro.Length + bytes.Length, eof.Length);
@@ -73,8 +67,8 @@ namespace UConv.Core
 
         public static void WriteBytes(Socket socket, byte[] bytes)
         {
-            byte[] eof = Encoding.ASCII.GetBytes("<EOF>");
-            byte[] payload = new byte[bytes.Length + eof.Length];
+            var eof = Encoding.ASCII.GetBytes("<EOF>");
+            var payload = new byte[bytes.Length + eof.Length];
             Buffer.BlockCopy(bytes, 0, payload, 0, bytes.Length);
             Buffer.BlockCopy(eof, 0, payload, bytes.Length, eof.Length);
             socket.Send(payload);

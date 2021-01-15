@@ -1,16 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace UConv.Core
 {
-    public partial class ConverterDBContext : DbContext
+    public class ConverterDBContext : DbContext
     {
-        public ConverterDBContext()
-        {
-        }
-
         public virtual DbSet<Record> Records { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
 
@@ -35,13 +31,14 @@ namespace UConv.Core
 
         public void AddRating(Rating rating)
         {
-            this.Ratings.Add(rating);
+            Ratings.Add(rating);
         }
 
 
-        public List<Record> SelectRecordsPage(int page, int count, String convFilter, DateTime? startDateFilter, DateTime? endDateFilter)
+        public List<Record> SelectRecordsPage(int page, int count, string convFilter, DateTime? startDateFilter,
+            DateTime? endDateFilter)
         {
-            List<Record> records = new List<Record>();
+            var records = new List<Record>();
             if (page >= 1)
             {
                 var i = 0;
@@ -49,33 +46,21 @@ namespace UConv.Core
                 using (var context = new ConverterDBContext())
                 {
                     var selectedRecords = context.Records.AsQueryable();
-                    if (convFilter != null && convFilter.ToString() != "")
-                    {
-                        selectedRecords = selectedRecords.Where(r => r.converter == convFilter.ToString());
-                    }
+                    if (convFilter != null && convFilter != "")
+                        selectedRecords = selectedRecords.Where(r => r.converter == convFilter);
                     if (startDateFilter != null)
-                    {
                         selectedRecords = selectedRecords.Where(r => r.date >= startDateFilter);
-                    }
-                    if (endDateFilter != null)
-                    {
-                        selectedRecords = selectedRecords.Where(r => r.date <= endDateFilter);
-                    }
-                    foreach (Record r in selectedRecords.ToList())
+                    if (endDateFilter != null) selectedRecords = selectedRecords.Where(r => r.date <= endDateFilter);
+                    foreach (var r in selectedRecords.ToList())
                     {
                         if (i >= count * (page - 1))
                         {
-                            bool add = true;
+                            var add = true;
 
-                            if (add)
-                            {
-                                records.Add(r);
-                            }
+                            if (add) records.Add(r);
                         }
-                        if (records.Count == count)
-                        {
-                            break;
-                        }
+
+                        if (records.Count == count) break;
                         i++;
                     }
                 }

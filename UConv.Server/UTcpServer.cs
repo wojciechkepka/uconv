@@ -5,25 +5,20 @@ using System.Threading.Tasks;
 
 namespace UConv.Server
 {
-    class UTcpServer
+    internal class UTcpServer
     {
         public delegate void ConnectionHandlerDelegate(NetworkStream ns);
 
         protected readonly ConnectionHandlerDelegate _OnHandleConnection;
-
-        protected List<Task> TcpClientTasks = new List<Task>();
-        protected readonly int MaxConcurrentListeners;
-        protected readonly int Timeout;
         protected readonly string Hostname;
-        protected readonly int Port;
         protected readonly TcpListener Listener;
-        protected bool IsRunning;
+        protected readonly int MaxConcurrentListeners;
+        protected readonly int Port;
+        protected readonly int Timeout;
         private volatile bool _ExitSignal;
-        public virtual bool ExitSignal
-        {
-            get => this._ExitSignal;
-            set => this._ExitSignal = value;
-        }
+        protected bool IsRunning;
+
+        protected List<Task> TcpClientTasks = new();
 
         public UTcpServer(
             string hostname,
@@ -57,6 +52,12 @@ namespace UConv.Server
             _OnHandleConnection += connectionHandler;
         }
 
+        public virtual bool ExitSignal
+        {
+            get => _ExitSignal;
+            set => _ExitSignal = value;
+        }
+
         public virtual void Stop()
         {
             if (!IsRunning) return;
@@ -69,10 +70,7 @@ namespace UConv.Server
             Listener.Start(MaxConcurrentListeners);
 
             IsRunning = true;
-            while (!ExitSignal)
-            {
-                ConnectionLoop();
-            }
+            while (!ExitSignal) ConnectionLoop();
             IsRunning = false;
         }
 
@@ -87,7 +85,7 @@ namespace UConv.Server
                 TcpClientTasks.Add(AwaiterTask);
             }
 
-            int RemoveAtIndex = Task.WaitAny(TcpClientTasks.ToArray(), Timeout);
+            var RemoveAtIndex = Task.WaitAny(TcpClientTasks.ToArray(), Timeout);
 
             if (RemoveAtIndex > 0)
                 TcpClientTasks.RemoveAt(RemoveAtIndex);
@@ -97,10 +95,11 @@ namespace UConv.Server
         {
             if (!connection.Connected) return;
 
-            using (NetworkStream ns = connection.GetStream())
+            using (var ns = connection.GetStream())
             {
                 _OnHandleConnection.Invoke(ns);
             }
+
             connection.Client.Close();
             connection.Close();
         }
@@ -109,6 +108,5 @@ namespace UConv.Server
         protected virtual void OnHandleConnection(NetworkStream ns)
         {
         }
-
     }
 }

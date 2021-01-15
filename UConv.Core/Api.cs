@@ -14,26 +14,25 @@ namespace UConv.Core
         Convert,
         ExchangeRate,
         SaveRating,
-        LastRating,
+        LastRating
     }
 
     [DataContract]
     public abstract class Message
     {
-
-        public static T FromData<T>(String data)
-        where T : Message
+        public static T FromData<T>(string data)
+            where T : Message
         {
-            DataContractSerializer ser = new DataContractSerializer(typeof(T), typeof(T).Name.ToString(), "");
+            var ser = new DataContractSerializer(typeof(T), typeof(T).Name, "");
             var sr = new StringReader(data);
             var xr = new XmlTextReader(sr);
-            return (T)ser.ReadObject(xr);
+            return (T) ser.ReadObject(xr);
         }
 
-        public String ToXmlString<T>()
-        where T : Message
+        public string ToXmlString<T>()
+            where T : Message
         {
-            DataContractSerializer ser = new DataContractSerializer(typeof(T), typeof(T).Name.ToString(), "");
+            var ser = new DataContractSerializer(typeof(T), typeof(T).Name, "");
             var sw = new StringWriter();
             var xw = new XmlTextWriter(sw);
             ser.WriteObject(xw, this);
@@ -41,7 +40,7 @@ namespace UConv.Core
         }
 
         public byte[] ToXmlBinary<T>()
-        where T : Message
+            where T : Message
         {
             return Encoding.ASCII.GetBytes(ToXmlString<T>());
         }
@@ -50,32 +49,32 @@ namespace UConv.Core
     [DataContract]
     public abstract class Request : Message
     {
-        [DataMember]
-        public Method method { get; set; }
-
         public Request(Method method)
         {
             this.method = method;
         }
 
-        public new static T FromData<T>(String data)
-        where T : Request
+        [DataMember] public Method method { get; set; }
+
+        public new static T FromData<T>(string data)
+            where T : Request
         {
             return Message.FromData<T>(data);
         }
-
     }
 
     [DataContract]
     public abstract class Response : Message
     {
-        public bool status { get; set; }
         public Response(bool status)
         {
             this.status = status;
         }
-        public new static T FromData<T>(String data)
-        where T : Response
+
+        public bool status { get; set; }
+
+        public new static T FromData<T>(string data)
+            where T : Response
         {
             return Message.FromData<T>(data);
         }
@@ -84,23 +83,23 @@ namespace UConv.Core
     [DataContract]
     public class ErrResponse : Response
     {
-        public String message { get; set; }
-
-        public ErrResponse(String message) : base(false)
+        public ErrResponse(string message) : base(false)
         {
             this.message = message;
         }
+
+        public string message { get; set; }
     }
 
     [DataContract]
     public class ConvRequest : Request
     {
-        public String converter;
-        public String inputUnit;
-        public String outputUnit;
-        public String value;
+        public string converter;
+        public string inputUnit;
+        public string outputUnit;
+        public string value;
 
-        public ConvRequest(String converter, String inputUnit, String outputUnit, String value) : base(Method.Convert)
+        public ConvRequest(string converter, string inputUnit, string outputUnit, string value) : base(Method.Convert)
         {
             this.converter = converter;
             this.inputUnit = inputUnit;
@@ -112,9 +111,9 @@ namespace UConv.Core
     [DataContract]
     public class ConvResponse : Response
     {
-        public String value;
+        public string value;
 
-        public ConvResponse(String value) : base(true)
+        public ConvResponse(string value) : base(true)
         {
             this.value = value;
         }
@@ -123,9 +122,9 @@ namespace UConv.Core
     [DataContract]
     public class ExchangeRateRequest : Request
     {
-        public String currency;
+        public string currency;
 
-        public ExchangeRateRequest(String currency) : base(Method.ExchangeRate)
+        public ExchangeRateRequest(string currency) : base(Method.ExchangeRate)
         {
             this.currency = currency;
         }
@@ -134,10 +133,9 @@ namespace UConv.Core
     [DataContract]
     public class ExchangeRateResponse : Response
     {
-        [DataMember]
-        public Dictionary<String, Double> rates;
+        [DataMember] public Dictionary<string, double> rates;
 
-        public ExchangeRateResponse(Dictionary<String, Double> rates) : base(true)
+        public ExchangeRateResponse(Dictionary<string, double> rates) : base(true)
         {
             this.rates = rates;
         }
@@ -148,14 +146,14 @@ namespace UConv.Core
     public class ConvListRequest : Request
     {
         public ConvListRequest() : base(Method.ConverterList)
-        { }
+        {
+        }
     }
 
     [DataContract]
     public class ConvListResponse : Response
     {
-        [DataMember]
-        public Dictionary<string, List<Unit>> converters;
+        [DataMember] public Dictionary<string, List<Unit>> converters;
 
         public ConvListResponse(Dictionary<string, List<Unit>> converters) : base(true)
         {
@@ -204,7 +202,7 @@ namespace UConv.Core
         public int rating;
 
 
-        public LastRatingResponse(DateTime date, String hostname, int rating) : base(true)
+        public LastRatingResponse(DateTime date, string hostname, int rating) : base(true)
         {
             this.date = date;
             this.hostname = hostname;
@@ -212,4 +210,3 @@ namespace UConv.Core
         }
     }
 }
-

@@ -3,19 +3,20 @@ using System.Net.Sockets;
 
 namespace UConv.Server
 {
-
-
-    class MessageServer : UTcpServer
+    internal class MessageServer : UTcpServer
     {
-        protected readonly MessageDelegate OnMessage;
         public delegate void MessageDelegate(NetworkStream ns, string message);
 
-        public MessageServer(string hostname, int port, int timeout, int maxListeners) : base(hostname, port, timeout, maxListeners)
+        protected readonly MessageDelegate OnMessage;
+
+        public MessageServer(string hostname, int port, int timeout, int maxListeners) : base(hostname, port, timeout,
+            maxListeners)
         {
             OnMessage += OnHandleMessage;
         }
 
-        public MessageServer(MessageDelegate onMessageHandler, string hostname, int port, int timeout, int maxListeners) : base(hostname, port, timeout, maxListeners)
+        public MessageServer(MessageDelegate onMessageHandler, string hostname, int port, int timeout, int maxListeners)
+            : base(hostname, port, timeout, maxListeners)
         {
             OnMessage += onMessageHandler;
         }
@@ -42,6 +43,7 @@ namespace UConv.Server
 
         // Do nadpisania przed nadrzędną klasę
         protected virtual void OnHandleMessage(NetworkStream ns, string message)
-        { }
+        {
+        }
     }
 }

@@ -9,45 +9,48 @@ namespace UConv.Tests
         [TestMethod]
         public void LexesIdent()
         {
-            string inp = "x";
-            ExprLexer l = new ExprLexer(inp);
+            var inp = "x";
+            var l = new ExprLexer(inp);
 
-            IdentToken want = new IdentToken(inp);
-            Token got = l.NextToken();
+            var want = new IdentToken(inp);
+            var got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual(want.Identifier, ((IdentToken)got).Identifier);
+            Assert.AreEqual(want.Identifier, ((IdentToken) got).Identifier);
         }
+
         [TestMethod]
         public void LexesNum()
         {
-            string inp = "12";
-            ExprLexer l = new ExprLexer(inp);
+            var inp = "12";
+            var l = new ExprLexer(inp);
 
-            NumToken want = new NumToken(12.0);
-            Token got = l.NextToken();
+            var want = new NumToken(12.0);
+            var got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual(want.Number, ((NumToken)got).Number);
+            Assert.AreEqual(want.Number, ((NumToken) got).Number);
         }
+
         [TestMethod]
         public void LexesLongIdent()
         {
-            string inp = "some_name";
-            ExprLexer l = new ExprLexer(inp);
+            var inp = "some_name";
+            var l = new ExprLexer(inp);
 
-            IdentToken want = new IdentToken(inp);
-            Token got = l.NextToken();
+            var want = new IdentToken(inp);
+            var got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual(want.Identifier, ((IdentToken)got).Identifier);
+            Assert.AreEqual(want.Identifier, ((IdentToken) got).Identifier);
         }
+
         [TestMethod]
         public void LexesIdentAndNum()
         {
-            string inp = "some_var = 42.0";
-            ExprLexer l = new ExprLexer(inp);
+            var inp = "some_var = 42.0";
+            var l = new ExprLexer(inp);
 
-            Token got = l.NextToken();
+            var got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual("some_var", ((IdentToken)got).Identifier);
+            Assert.AreEqual("some_var", ((IdentToken) got).Identifier);
 
             got = l.NextToken();
             Assert.IsNotNull(got);
@@ -55,18 +58,18 @@ namespace UConv.Tests
 
             got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual(42.0, ((NumToken)got).Number);
+            Assert.AreEqual(42.0, ((NumToken) got).Number);
         }
 
         [TestMethod]
         public void LexesNumOperations()
         {
-            string inp = "x = 42.0 + 15.9;";
-            ExprLexer l = new ExprLexer(inp);
+            var inp = "x = 42.0 + 15.9;";
+            var l = new ExprLexer(inp);
 
-            Token got = l.NextToken();
+            var got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual("x", ((IdentToken)got).Identifier);
+            Assert.AreEqual("x", ((IdentToken) got).Identifier);
 
             got = l.NextToken();
             Assert.IsNotNull(got);
@@ -74,7 +77,7 @@ namespace UConv.Tests
 
             got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual(42.0, ((NumToken)got).Number);
+            Assert.AreEqual(42.0, ((NumToken) got).Number);
 
             got = l.NextToken();
             Assert.IsNotNull(got);
@@ -82,7 +85,7 @@ namespace UConv.Tests
 
             got = l.NextToken();
             Assert.IsNotNull(got);
-            Assert.AreEqual(15.9, ((NumToken)got).Number);
+            Assert.AreEqual(15.9, ((NumToken) got).Number);
 
             got = l.NextToken();
             Assert.IsNotNull(got);

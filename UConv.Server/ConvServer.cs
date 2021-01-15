@@ -9,25 +9,27 @@ using static UConv.Core.Units;
 
 namespace UConv.Server
 {
-    class ConvServer : MessageServer
+    internal class ConvServer : MessageServer
     {
-        protected List<IConverter<double, Unit>> converters = new List<IConverter<double, Unit>>
+        protected List<IConverter<double, Unit>> converters = new()
         {
             new DistanceConverter(),
             new MassConverter(),
             new CurrencyConverter(),
             new MassConverter(),
-            new SpeedConverter(),
+            new SpeedConverter()
         };
-        protected TimeConverter tConv = new TimeConverter();
+
+        protected TimeConverter tConv = new();
 
         public ConvServer(string hostname, int port) : base(hostname, port, 500, 10)
-        { }
+        {
+        }
 
         protected override void OnHandleMessage(NetworkStream ns, string message)
         {
-            int dataStart = message.IndexOf('<');
-            string path = message[..dataStart];
+            var dataStart = message.IndexOf('<');
+            var path = message[..dataStart];
             message = message[dataStart..];
             byte[] data;
 
@@ -66,7 +68,7 @@ namespace UConv.Server
         {
             var addr = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
             var port = 7001;
-            ConvServer server = new ConvServer(addr, port);
+            var server = new ConvServer(addr, port);
             Console.WriteLine($"Listening on {addr}:{port}");
             server.Listen();
         }
@@ -76,29 +78,29 @@ namespace UConv.Server
             switch (request.converter)
             {
                 case "Time":
-                    Tuple<string, TimeFormat> ret = tConv.Convert(
+                    var ret = tConv.Convert(
                         request.value,
                         TimeFormatFromString(request.inputUnit),
                         TimeFormatFromString(request.outputUnit)
                     );
                     return new ConvResponse(ret.Item1);
                 default:
-                    Double val = Double.Parse(request.value);
-                    foreach (IConverter<double, Unit> iconv in converters)
-                    {
+                    var val = double.Parse(request.value);
+                    foreach (var iconv in converters)
                         if (iconv.Name == request.converter)
                         {
-                            Tuple<double, Unit> ret2 = iconv.Convert(
+                            var ret2 = iconv.Convert(
                                 val,
                                 UnitFromString(request.inputUnit),
                                 UnitFromString(request.outputUnit)
-                             );
+                            );
 
                             return new ConvResponse(ret2.Item1.ToString());
                         }
-                    }
+
                     break;
             }
+
             return new ErrResponse($"Converter {request.converter} not found.");
         }
 
@@ -109,15 +111,16 @@ namespace UConv.Server
 
         private Response converterListMethod(Request _)
         {
-            var convs = new Dictionary<String, List<Unit>> { };
+            var convs = new Dictionary<string, List<Unit>>();
 
-            foreach (IConverter<double, Unit> iconv in converters)
+            foreach (var iconv in converters)
             {
                 if (convs.ContainsKey(iconv.Name)) continue;
                 convs.Add(iconv.Name, iconv.SupportedUnits);
             }
+
             // TODO: fixme
-            convs.Add(tConv.Name, new List<Unit> { });
+            convs.Add(tConv.Name, new List<Unit>());
 
             return new ConvListResponse(convs);
         }

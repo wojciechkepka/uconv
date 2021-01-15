@@ -9,5 +9,4 @@ namespace UConv.Core
         List<U> SupportedUnits { get; }
         Tuple<T, U> Convert(T val, U inpUnit, U outUnit);
     }
-
 }

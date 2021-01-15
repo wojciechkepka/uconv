@@ -1,37 +1,11 @@
-﻿using System;
-
-namespace UConv.Core
+﻿namespace UConv.Core
 {
     public class Units
     {
         public enum TimeFormat
         {
             TwentyFourHour,
-            TwelveHour,
-        }
-        public static TimeFormat TimeFormatFromString(string format)
-        {
-            switch (format)
-            {
-                case "h":
-                    return TimeFormat.TwentyFourHour;
-                case "am":
-                case "pm":
-                    return TimeFormat.TwelveHour;
-                default:
-                    throw new InvalidTimeFormat(format);
-            }
-        }
-        public static TimeFormat OppositeFormat(TimeFormat format)
-        {
-            if (format == TimeFormat.TwelveHour)
-            {
-                return TimeFormat.TwentyFourHour;
-            }
-            else
-            {
-                return TimeFormat.TwelveHour;
-            }
+            TwelveHour
         }
 
         public enum Unit
@@ -60,9 +34,31 @@ namespace UConv.Core
             JPY,
             GBP,
             BGN,
-            ZAR,
+            ZAR
         }
-        public static Unit UnitFromString(String unit)
+
+        public static TimeFormat TimeFormatFromString(string format)
+        {
+            switch (format)
+            {
+                case "h":
+                    return TimeFormat.TwentyFourHour;
+                case "am":
+                case "pm":
+                    return TimeFormat.TwelveHour;
+                default:
+                    throw new InvalidTimeFormat(format);
+            }
+        }
+
+        public static TimeFormat OppositeFormat(TimeFormat format)
+        {
+            if (format == TimeFormat.TwelveHour)
+                return TimeFormat.TwentyFourHour;
+            return TimeFormat.TwelveHour;
+        }
+
+        public static Unit UnitFromString(string unit)
         {
             switch (unit)
             {
@@ -121,6 +117,7 @@ namespace UConv.Core
                     throw new UnexpectedEnumValueException<Unit>(unit);
             }
         }
+
         public static string UnitSymbol(Unit unit)
         {
             switch (unit)

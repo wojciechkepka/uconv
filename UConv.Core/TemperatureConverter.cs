@@ -8,20 +8,20 @@ namespace UConv.Core
     public class TemperatureConverter : IConverter<double, Unit>
     {
         public string Name => "Temperature";
-        public List<Unit> SupportedUnits => new List<Unit>() {
+
+        public List<Unit> SupportedUnits => new()
+        {
             Unit.Celsius,
             Unit.Fahrenheit,
-            Unit.Kelvin,
+            Unit.Kelvin
         };
+
         public Tuple<double, Unit> Convert(double val, Unit inpUnit, Unit outUnit)
         {
-            if (inpUnit == outUnit)
-            {
-                return new Tuple<double, Unit>(val, outUnit);
-            }
+            if (inpUnit == outUnit) return new Tuple<double, Unit>(val, outUnit);
 
             double outVal = 0;
-            bool calculated = false;
+            var calculated = false;
 
             switch (inpUnit)
             {
@@ -36,6 +36,7 @@ namespace UConv.Core
                         outVal = CelsiusToKelvin(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.Fahrenheit:
                     if (outUnit == Unit.Celsius)
@@ -48,6 +49,7 @@ namespace UConv.Core
                         outVal = FahrenheitToKelvin(val);
                         calculated = true;
                     }
+
                     break;
                 case Unit.Kelvin:
                     if (outUnit == Unit.Celsius)
@@ -60,19 +62,15 @@ namespace UConv.Core
                         outVal = KelvinToFahrenheit(val);
                         calculated = true;
                     }
+
                     break;
                 default:
                     throw new UnsupportedUnit(inpUnit);
             }
 
             if (calculated)
-            {
                 return new Tuple<double, Unit>(outVal, outUnit);
-            }
-            else
-            {
-                throw new IncompatibleConversionUnits(inpUnit, outUnit);
-            }
+            throw new IncompatibleConversionUnits(inpUnit, outUnit);
         }
     }
 }

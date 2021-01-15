@@ -104,6 +104,16 @@ namespace UConv.Client
             });
         }
 
+        private async Task clearStats()
+        {
+            await Task.Run(() =>
+            {
+                var resp = client.ClearDataRequest();
+                if (typeof(ErrResponse) == resp.GetType())
+                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
+            });
+        }
+
         private void setMessage(string message)
         {
             outputTextBlock.Foreground = Brushes.Black;
@@ -188,12 +198,7 @@ namespace UConv.Client
 
         private async void clearDataButton_Click(object sender, RoutedEventArgs e)
         {
-            await Task.Run(() =>
-            {
-                var resp = client.ClearDataRequest();
-                if (typeof(ErrResponse) == resp.GetType())
-                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
-            });
+            await clearStats();
             getData();
         }
 

@@ -1,27 +1,37 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using UConv.Core;
+using System.Collections.Generic;
 
 namespace UConv.Client
 {
-    internal class ConvClient : UTcpClient
+    internal class UConvClient
     {
-        public ConvClient(
+        public readonly string Hostname;
+        public readonly int Port;
+        private Queue<UTcpClient> clients;
+        
+        public UConvClient(
             string hostname,
             int port
-        ) : base(hostname, port)
+        )
         {
+            Hostname = hostname;
+            Port = port;
+            clients = new Queue<UTcpClient> { };
         }
 
         private Response HandleRequest<I, O>(string path, Request req)
             where I : Request
             where O : Response
         {
-            Connect();
-            using (var ns = GetStream())
+            var client = new UTcpClient(Hostname, Port);
+            client.Connect();
+            using (var ns = client.GetStream())
             {
                 if (!ns.CanRead || !ns.CanWrite) throw new IOException("Can't write to or read from tcp connection");
-                var data = writeRequest<I>(ns, path, req);
+                var data = client.writeRequest<I>(ns, path, req);
                 try
                 {
                     return Response.FromData<O>(data);
@@ -60,6 +70,30 @@ namespace UConv.Client
         {
             return HandleRequest<LastRatingRequest, LastRatingResponse>("/last_rating",
                 new LastRatingRequest(hostname));
+        }
+
+        public Response ClearDataRequest()
+        {
+            return HandleRequest<ClearDataRequest, ClearDataResponse>("/clear_data", 
+                new ClearDataRequest(Dns.GetHostName()));
+        }
+
+        public Response ExchangeRatesRequest(string currency)
+        {
+            return HandleRequest<ExchangeRateRequest, ExchangeRateResponse>("/exchange_rates",
+                new ExchangeRateRequest(currency));
+        }
+
+        public Response CurrenciesListRequest()
+        {
+            return HandleRequest<CurrencyListRequest, CurrencyListResponse>("/currencies",
+                new CurrencyListRequest());
+        }
+
+        public Response StatisticsRequest()
+        {
+            return HandleRequest<StatisticsRequest, StatisticsResponse>("/stats",
+                new StatisticsRequest());
         }
     }
 }

@@ -13,20 +13,20 @@ using static UConv.Core.Units;
 
 namespace UConv.Server
 {
-    internal class ConvServer : MessageServer
+    internal class UConvServer : MessageServer
     {
         protected List<IConverter<double, Unit>> converters = new()
         {
             new DistanceConverter(),
             new MassConverter(),
             new CurrencyConverter(),
-            new MassConverter(),
+            new TemperatureConverter(),
             new SpeedConverter()
         };
 
         protected TimeConverter tConv = new();
 
-        public ConvServer(string hostname, int port) : base(hostname, port, 500, 10)
+        public UConvServer(string hostname, int port) : base(hostname, port, 500, 10)
         {
         }
 
@@ -81,6 +81,15 @@ namespace UConv.Server
                     case "/clear_data":
                         HandleFunc<ClearDataRequest, ClearDataResponse>(clearDataMethod);
                         break;
+                    case "/exchange_rates":
+                        HandleFunc<ExchangeRateRequest, ExchangeRateResponse>(exchangeRatesMethod);
+                        break;
+                    case "/currencies":
+                        HandleFunc<CurrencyListRequest, CurrencyListResponse>(currencyListMethod);
+                        break;
+                    case "/stats":
+                        HandleFunc<StatisticsRequest, StatisticsResponse>(statisticsMethod);
+                        break;
                     default:
                         var resp = new ErrResponse($"Invalid route to `{path}`");
                         data = resp.ToXmlBinary<Response>();
@@ -108,9 +117,10 @@ namespace UConv.Server
 
         public static void Main(string[] args)
         {
+            ExchangeRates.SetRandomRates();
             var addr = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
             var port = 7001;
-            var server = new ConvServer(addr, port);
+            var server = new UConvServer(addr, port);
             Console.WriteLine($"Listening on {addr}:{port}");
             server.Listen();
         }
@@ -182,11 +192,6 @@ namespace UConv.Server
             }
         }
 
-        private Response exchangeMethod(ExchangeRateRequest _)
-        {
-            return new ErrResponse("unimplemented");
-        }
-
         private Response converterListMethod(Request _)
         {
             var convs = new Dictionary<string, List<Unit>>();
@@ -211,11 +216,20 @@ namespace UConv.Server
                 {
                     using (var context = new UConvDbContext())
                     {
-                        var record = context.Ratings.First(r => r.name == request.hostname);
+                        var record = context.Ratings.FirstOrDefault(r => r.name == request.hostname);
                         if (record == null)
-                            context.AddRating(new Rating {name = request.hostname, rating = request.rating});
+                        { 
+                            context.AddRating(new Rating {
+                                name = request.hostname, 
+                                rating = request.rating,
+                                date = DateTime.Now,
+                            });
+                        }
                         else
+                        {
                             record.rating = request.rating;
+                            record.date = DateTime.Now;
+                        }
                         context.SaveChanges();
                     }
                 }
@@ -241,7 +255,7 @@ namespace UConv.Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to save rating to db - {ex.Message}");
+                Console.WriteLine($"Failed to get last user rating from database - {ex.Message}");
             }
 
             return new LastRatingResponse(DateTime.Now, Dns.GetHostName(), 0);
@@ -255,15 +269,55 @@ namespace UConv.Server
                 {
                     context.Ratings.RemoveRange(context.Ratings.Where(r => r.name == request.hostname));
                     context.Records.RemoveRange(context.Records.Where(r => r.hostname == request.hostname));
+                    context.SaveChanges();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to save rating to db - {ex.Message}");
+                Console.WriteLine($"Failed to clear user data from database - {ex.Message}");
             }
 
-            return new LastRatingResponse(DateTime.Now, Dns.GetHostName(), 0);
+            return new ClearDataResponse();
 
+        }
+
+        private Response exchangeRatesMethod(ExchangeRateRequest request)
+        {
+            Dictionary<Unit, double> ret;
+            if (ExchangeRates.Rates.TryGetValue(UnitFromName(request.currency), out ret))
+            {
+                return new ExchangeRateResponse(ret);
+
+            }
+
+            return new ErrResponse($"Rates for specified currency `{request.currency}` not available.");
+        }
+
+        private Response currencyListMethod(CurrencyListRequest request)
+        {
+            List<string> currencies = new List<string> { };
+            foreach(Unit u in new CurrencyConverter().SupportedUnits)
+            {
+                currencies.Add(u.ToString());
+            }
+
+            return new CurrencyListResponse(currencies);
+        }
+
+        private Response statisticsMethod(StatisticsRequest request)
+        {
+            try
+            {
+                using (var context = new UConvDbContext())
+                {
+                    return new StatisticsResponse(context.Records.ToList());
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to clear user data from database - {ex.Message}");
+                return new ErrResponse($"Database connection failed - {ex.Message}");
+            }
         }
     }
 }

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Controls.Primitives;
 using UConv.Controls;
 using UConv.Core;
 using static UConv.Core.Units;
@@ -13,23 +15,60 @@ namespace UConv.Client
 {
     public partial class MainWindow : Window
     {
-        private readonly ConvClient client;
+        private readonly UConvClient client;
 
         private Dictionary<string, List<Unit>> converters;
+        private Thread clientThread;
 
         public MainWindow()
         {
             InitializeComponent();
-            client = new ConvClient(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString(), 7001);
-            getConverters();
-            getLastRating();
-            convComboBox.ItemsSource = converters.Keys;
+            client = new UConvClient(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString(), 7001);
+            getData();
             userRateControl.UserRatingChanged += userRatingChangedHandler;
         }
 
-        private void getLastRating()
+        private void getData()
         {
-            var t = new Thread(() =>
+            if (clientThread != null && clientThread.IsAlive) return;
+            clientThread = new Thread(async () =>
+            {
+                await getConverters();
+                Dispatcher.Invoke(() =>
+                {
+                    convComboBox.ItemsSource = converters.Keys;
+                });
+                await getCurrencies();
+                await getStats();
+                await getLastRating();
+            });
+            clientThread.Start();
+
+        }
+
+        private async Task getCurrencies()
+        {
+            await Task.Run(() =>
+            {
+                var resp = client.CurrenciesListRequest();
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
+                }
+                else
+                {
+                    var rateResp = (CurrencyListResponse) resp;
+                    Dispatcher.Invoke(() =>
+                    {
+                        currencyComboBox.ItemsSource = rateResp.currencies;
+                    });
+                }
+            });
+        }
+
+        private async Task getLastRating()
+        {
+            await Task.Run(() =>
             {
                 var resp = client.LastRatingRequest(Dns.GetHostName());
                 if (typeof(ErrResponse) == resp.GetType())
@@ -47,16 +86,47 @@ namespace UConv.Client
                     });
                 }
             });
-            t.Start();
         }
 
-        private void getConverters()
+        private async Task getConverters()
         {
-            var resp = client.ConverterListRequest();
-            if (typeof(ErrResponse) == resp.GetType())
-                setError(((ErrResponse) resp).message);
-            else
-                converters = ((ConvListResponse) resp).converters;
+            await Task.Run(() =>
+            {
+                var resp = client.ConverterListRequest();
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        setError(((ErrResponse)resp).message);
+                    });
+                }
+                else
+                {
+                    converters = ((ConvListResponse) resp).converters;
+                }
+            });
+        }
+
+        private async Task getStats()
+        {
+            await Task.Run(() =>
+            {
+                var resp = client.StatisticsRequest();
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        setError(((ErrResponse)resp).message);
+                    });
+                }
+                else
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        statsDataGrid.ItemsSource = ((StatisticsResponse)resp).stats;
+                    });
+                }
+            });
         }
 
         private void setMessage(string message)
@@ -139,6 +209,88 @@ namespace UConv.Client
             {
                 setError(ex.Message);
             }
+        }
+
+        private async void clearDataButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            await Task.Run(() =>
+            {
+                var resp = client.ClearDataRequest();
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        setError(((ErrResponse)resp).message);
+                    });
+                }
+
+            });
+            getData();
+        }
+
+        private void currencyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            currencyRateStackPanel.Children.Clear();
+            try
+            {
+                var resp = client.ExchangeRatesRequest(currencyComboBox.SelectedItem.ToString());
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    setError(((ErrResponse)resp).message);
+                    return;
+                }
+
+                var ratesResp = (ExchangeRateResponse)resp;
+                foreach (var currency in ratesResp.rates)
+                {
+                    Grid g = new Grid { };
+                    var nameCol = new ColumnDefinition();
+                    nameCol.Width = new GridLength(30, GridUnitType.Star);
+                    var valCol = new ColumnDefinition();
+                    valCol.Width = new GridLength(70, GridUnitType.Star);
+                    g.ColumnDefinitions.Add(nameCol);
+                    g.ColumnDefinitions.Add(valCol);
+                    Label name = new Label { Content = $"{currency.Key}    ", FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Left};
+                    Label value = new Label { Content = currency.Value, FontStyle = FontStyles.Italic, HorizontalAlignment = HorizontalAlignment.Right };
+                    name.SetValue(Grid.ColumnProperty, 0);
+                    value.SetValue(Grid.ColumnProperty, 1);
+                    g.Children.Add(name);
+                    g.Children.Add(value);
+                    currencyRateStackPanel.Children.Add(g);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                setError(ex.Message);
+            }
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (clientThread.IsAlive) return;
+
+            var tab = ((TabItem)mainTabControl.SelectedItem).Header;
+            clientThread = new Thread(async () =>
+            {
+                switch (tab)
+                {
+                    case "Converter":
+                        await getConverters();
+                        break;
+                    case "Statistics":
+                        await getStats();
+                        break;
+                    case "Settings":
+                        await getLastRating();
+                        break;
+                    case "Exchange rates":
+                        await getCurrencies();
+                        break;
+                }
+            });
+            clientThread.Start();
         }
     }
 }

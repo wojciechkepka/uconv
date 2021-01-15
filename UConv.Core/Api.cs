@@ -16,6 +16,8 @@ namespace UConv.Core
         SaveRating,
         LastRating,
         ClearData,
+        CurrencyList,
+        Statistics
     }
 
     [DataContract]
@@ -138,9 +140,9 @@ namespace UConv.Core
     [DataContract]
     public class ExchangeRateResponse : Response
     {
-        [DataMember] public Dictionary<string, double> rates;
+        [DataMember] public Dictionary<Unit, double> rates;
 
-        public ExchangeRateResponse(Dictionary<string, double> rates) : base(true)
+        public ExchangeRateResponse(Dictionary<Unit, double> rates) : base(true)
         {
             this.rates = rates;
         }
@@ -234,6 +236,44 @@ namespace UConv.Core
     {
         public ClearDataResponse() : base(true)
         {
+        }
+    }
+
+    [DataContract]
+    public class CurrencyListRequest : Request
+    {
+
+        public CurrencyListRequest() : base(Method.CurrencyList)
+        {
+        }
+    }
+
+    [DataContract]
+    public class CurrencyListResponse : Response
+    {
+        [DataMember] public List<string> currencies;
+        public CurrencyListResponse(List<string> currencies) : base(true)
+        {
+            this.currencies = currencies;
+        }
+    }
+
+    [DataContract]
+    public class StatisticsRequest : Request
+    {
+
+        public StatisticsRequest() : base(Method.Statistics)
+        {
+        }
+    }
+
+    [DataContract]
+    public class StatisticsResponse : Response
+    {
+        [DataMember] public List<Record> stats;
+        public StatisticsResponse(List<Record> stats) : base(true)
+        {
+            this.stats = stats;
         }
     }
 

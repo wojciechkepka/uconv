@@ -22,17 +22,17 @@ namespace UConv.Client
             client = new TcpClient();
         }
 
-        protected void Connect()
+        public void Connect()
         {
             client.Connect(Hostname, Port);
         }
 
-        protected NetworkStream GetStream()
+        public NetworkStream GetStream()
         {
             return client.GetStream();
         }
 
-        protected string writeRequest<I>(NetworkStream ns, string route, Request req)
+        public string writeRequest<I>(NetworkStream ns, string route, Request req)
             where I : Request
         {
             var data = req.ToXmlBinary<I>();

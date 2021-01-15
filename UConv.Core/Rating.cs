@@ -6,10 +6,10 @@ namespace UConv.Core
     public class Rating
     {
         [Key] public int id { get; set; }
-        public DateTime date { get; set; }
+        [Required] public DateTime date { get; set; }
 
-        [Required] [StringLength(100)] public string name { get; set; }
+        [Required] [StringLength(250)] public string name { get; set; }
 
-        public int rating { get; set; }
+        [Required] public int rating { get; set; }
     }
 }

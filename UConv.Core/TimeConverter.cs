@@ -7,7 +7,7 @@ namespace UConv.Core
 {
     public class TimeConverter : IConverter<string, TimeFormat>
     {
-        public string Name => "Distance Converter";
+        public string Name => "Time";
 
         public List<TimeFormat> SupportedUnits => new()
         {

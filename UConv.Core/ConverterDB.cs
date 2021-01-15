@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace UConv.Core
 {
-    public class ConverterDBContext : DbContext
+    public class UConvDbContext : DbContext
     {
         public virtual DbSet<Record> Records { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
@@ -43,7 +43,7 @@ namespace UConv.Core
             {
                 var i = 0;
 
-                using (var context = new ConverterDBContext())
+                using (var context = new UConvDbContext())
                 {
                     var selectedRecords = context.Records.AsQueryable();
                     if (convFilter != null && convFilter != "")

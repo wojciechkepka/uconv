@@ -34,34 +34,47 @@ namespace UConv.Server
             byte[] data;
 
             Console.WriteLine($"[{DateTime.Now}] {path}");
-            switch (path)
+            try
             {
-                case "/convert":
-                    var convReq = Request.FromData<ConvRequest>(message);
-                    var convResp = convertMethod(convReq);
-                    data = convResp.ToXmlBinary<ConvResponse>();
-                    break;
-                case "/converters":
-                    var convlReq = Request.FromData<ConvListRequest>(message);
-                    var convlResp = converterListMethod(convlReq);
-                    data = convlResp.ToXmlBinary<ConvListResponse>();
-                    break;
-                case "/rateme":
-                    var rateReq = Request.FromData<RateMeRequest>(message);
-                    var rateResp = rateMeMethod(rateReq);
-                    data = rateResp.ToXmlBinary<RateMeResponse>();
-                    break;
-                default:
-                    var resp = new ErrResponse($"Invalid route to `{path}`");
-                    data = resp.ToXmlBinary<Response>();
-                    break;
-            }
+                switch (path)
+                {
+                    case "/convert":
+                        var convReq = Request.FromData<ConvRequest>(message);
+                        var convResp = convertMethod(convReq);
 
-            var writer = new StreamWriter(ns)
+                        data = convResp.ToXmlBinary<ConvResponse>();
+                        break;
+                    case "/converters":
+                        var convlReq = Request.FromData<ConvListRequest>(message);
+                        var convlResp = converterListMethod(convlReq);
+                        data = convlResp.ToXmlBinary<ConvListResponse>();
+                        break;
+                    case "/rateme":
+                        var rateReq = Request.FromData<RateMeRequest>(message);
+                        var rateResp = rateMeMethod(rateReq);
+                        if (rateResp.GetType() == typeof(ErrResponse))
+                            data = rateResp.ToXmlBinary<ErrResponse>();
+                        else
+                            data = rateResp.ToXmlBinary<RateMeResponse>();
+                        break;
+                    default:
+                        var resp = new ErrResponse($"Invalid route to `{path}`");
+                        data = resp.ToXmlBinary<Response>();
+                        break;
+                }
+
+
+                var writer = new StreamWriter(ns)
+                {
+                    AutoFlush = true
+                };
+                writer.WriteLine(Encoding.ASCII.GetString(data));
+            }
+            catch (Exception e)
             {
-                AutoFlush = true
-            };
-            writer.WriteLine(Encoding.ASCII.GetString(data));
+                Console.WriteLine(e.Message);
+                ;
+            }
         }
 
         public static void Main(string[] args)
@@ -127,8 +140,21 @@ namespace UConv.Server
 
         private Response rateMeMethod(RateMeRequest request)
         {
-            // Save rating to db
-            return new RateMeResponse();
+            try
+            {
+                using (var context = new UConvDbContext())
+                {
+                    context.AddRating(new Rating {name = request.hostname, rating = request.rating});
+                    context.SaveChanges();
+                }
+
+                // Save rating to db
+                return new RateMeResponse();
+            }
+            catch (Exception ex)
+            {
+                return new ErrResponse($"Failed to save rating to database - {ex.Message}");
+            }
         }
     }
 }

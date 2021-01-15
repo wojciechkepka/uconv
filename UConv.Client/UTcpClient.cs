@@ -44,7 +44,6 @@ namespace UConv.Client
                 Buffer.BlockCopy(data, 0, payload, ro.Length, data.Length);
                 var writer = new StreamWriter(ns);
                 writer.AutoFlush = true;
-
                 writer.WriteLine(Encoding.ASCII.GetString(payload));
                 var resp = reader.ReadLine();
                 ns.Close();

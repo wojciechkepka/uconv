@@ -47,10 +47,10 @@
 
     public class ExprLexer
     {
-        private char? current;
         private readonly int len;
-        private int saved;
+        private char? current;
         private int position = -1;
+        private int saved;
 
         public ExprLexer(string content)
         {

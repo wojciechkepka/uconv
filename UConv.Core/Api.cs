@@ -81,6 +81,7 @@ namespace UConv.Core
     }
 
     [DataContract]
+    [KnownType(typeof(ErrResponse))]
     public class ErrResponse : Response
     {
         public ErrResponse(string message) : base(false)
@@ -88,16 +89,19 @@ namespace UConv.Core
             this.message = message;
         }
 
-        public string message { get; set; }
+        [DataMember] public string message { get; set; }
     }
 
     [DataContract]
     public class ConvRequest : Request
     {
-        public string converter;
-        public string inputUnit;
-        public string outputUnit;
-        public string value;
+        [DataMember] public string converter;
+
+        [DataMember] public string inputUnit;
+
+        [DataMember] public string outputUnit;
+
+        [DataMember] public string value;
 
         public ConvRequest(string converter, string inputUnit, string outputUnit, string value) : base(Method.Convert)
         {
@@ -111,7 +115,7 @@ namespace UConv.Core
     [DataContract]
     public class ConvResponse : Response
     {
-        public string value;
+        [DataMember] public string value;
 
         public ConvResponse(string value) : base(true)
         {
@@ -122,7 +126,7 @@ namespace UConv.Core
     [DataContract]
     public class ExchangeRateRequest : Request
     {
-        public string currency;
+        [DataMember] public string currency;
 
         public ExchangeRateRequest(string currency) : base(Method.ExchangeRate)
         {
@@ -164,8 +168,9 @@ namespace UConv.Core
     [DataContract]
     public class RateMeRequest : Request
     {
-        public string hostname;
-        public int rating;
+        [DataMember] public string hostname;
+
+        [DataMember] public int rating;
 
         public RateMeRequest(string hostname, int rating) : base(Method.SaveRating)
         {
@@ -186,7 +191,7 @@ namespace UConv.Core
     [DataContract]
     public class LastRatingRequest : Request
     {
-        public string hostname;
+        [DataMember] public string hostname;
 
         public LastRatingRequest(string hostname) : base(Method.LastRating)
         {
@@ -197,9 +202,11 @@ namespace UConv.Core
     [DataContract]
     public class LastRatingResponse : Response
     {
-        public DateTime date;
-        public string hostname;
-        public int rating;
+        [DataMember] public DateTime date;
+
+        [DataMember] public string hostname;
+
+        [DataMember] public int rating;
 
 
         public LastRatingResponse(DateTime date, string hostname, int rating) : base(true)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UConv.Core;
 
 namespace UConv.Client
@@ -12,77 +13,53 @@ namespace UConv.Client
         {
         }
 
-        public Response ConvertRequest(string converter, string inputUnit, string outputUnit, string value)
+        private Response HandleRequest<I, O>(string path, Request req)
+            where I : Request
+            where O : Response
         {
             Connect();
             using (var ns = GetStream())
             {
-                var resp = writeRequest<ConvRequest>(ns, "/convert",
-                    new ConvRequest(converter, inputUnit, outputUnit, value));
+                if (!ns.CanRead || !ns.CanWrite) throw new IOException("Can't write to or read from tcp connection");
+                var data = writeRequest<I>(ns, path, req);
                 try
                 {
-                    return Response.FromData<ConvResponse>(resp);
+                    return Response.FromData<O>(data);
                 }
-                catch (Exception _)
+                catch (Exception)
                 {
                     try
                     {
-                        return Response.FromData<ErrResponse>(resp);
+                        return Response.FromData<ErrResponse>(data);
                     }
                     catch (Exception ex)
                     {
-                        throw new InvalidResponse(ex.Message, resp);
+                        throw new InvalidResponse(ex.Message, data);
                     }
                 }
             }
+        }
+
+        public Response ConvertRequest(string converter, string inputUnit, string outputUnit, string value)
+        {
+            return HandleRequest<ConvRequest, ConvResponse>("/convert",
+                new ConvRequest(converter, inputUnit, outputUnit, value));
         }
 
         public Response ConverterListRequest()
         {
-            Connect();
-            using (var ns = GetStream())
-            {
-                var resp = writeRequest<ConvListRequest>(ns, "/converters", new ConvListRequest());
-                try
-                {
-                    return Response.FromData<ConvListResponse>(resp);
-                }
-                catch (Exception _)
-                {
-                    try
-                    {
-                        return Response.FromData<ErrResponse>(resp);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidResponse(ex.Message, resp);
-                    }
-                }
-            }
+            return HandleRequest<ConvListRequest, ConvListResponse>("/converters", new ConvListRequest());
         }
 
         public Response RateMeRequest(string hostname, int rating)
         {
-            Connect();
-            using (var ns = GetStream())
-            {
-                var resp = writeRequest<RateMeRequest>(ns, "/rateme", new RateMeRequest(hostname, rating));
-                try
-                {
-                    return Response.FromData<RateMeResponse>(resp);
-                }
-                catch (Exception _)
-                {
-                    try
-                    {
-                        return Response.FromData<ErrResponse>(resp);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new InvalidResponse(ex.Message, resp);
-                    }
-                }
-            }
+            return HandleRequest<RateMeRequest, RateMeResponse>("/rateme", new RateMeRequest(hostname, rating));
+        }
+
+        public Response LastRatingRequest(string hostname)
+        {
+            return HandleRequest<LastRatingRequest, LastRatingResponse>("/last_rating",
+                new LastRatingRequest(hostname));
         }
     }
 }

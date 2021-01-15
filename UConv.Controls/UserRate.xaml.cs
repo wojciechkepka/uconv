@@ -36,7 +36,6 @@ namespace UConv.Controls
         {
             ResetColor();
             var col = ((StarButton) sender).GetValue(Grid.ColumnProperty);
-            var i = 0;
             SetColor((int) col + 1);
         }
 

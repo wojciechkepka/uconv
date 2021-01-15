@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -21,8 +22,32 @@ namespace UConv.Client
             InitializeComponent();
             client = new ConvClient(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString(), 7001);
             getConverters();
+            getLastRating();
             convComboBox.ItemsSource = converters.Keys;
             userRateControl.UserRatingChanged += userRatingChangedHandler;
+        }
+
+        private void getLastRating()
+        {
+            var t = new Thread(() =>
+            {
+                var resp = client.LastRatingRequest(Dns.GetHostName());
+                if (typeof(ErrResponse) == resp.GetType())
+                {
+                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
+                }
+                else
+                {
+                    var rateResp = (LastRatingResponse) resp;
+                    Dispatcher.Invoke(() =>
+                    {
+                        userRateControl.userRating = rateResp.rating;
+                        userRateControl.ResetColor();
+                        userRateControl.SetColor(userRateControl.userRating);
+                    });
+                }
+            });
+            t.Start();
         }
 
         private void getConverters()

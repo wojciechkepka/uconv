@@ -9,6 +9,8 @@ namespace UConv.Core
 
         public DateTime date { get; set; }
 
+        public string hostname { get; set; }
+
         [Required] [StringLength(20)] public string converter { get; set; }
 
         public double inputValue { get; set; }

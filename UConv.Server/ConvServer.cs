@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -29,6 +30,7 @@ namespace UConv.Server
         {
         }
 
+
         protected override void OnHandleMessage(NetworkStream ns, string message)
         {
             var sw = new Stopwatch();
@@ -40,6 +42,24 @@ namespace UConv.Server
             var isErr = false;
 
 
+            void HandleFunc<I, O>(Func<I, Response> method)
+                where I : Request
+                where O : Response
+            {
+                var req = Request.FromData<I>(message);
+                var resp = method(req);
+                data = resp.ToXmlBinary<O>();
+                if (resp.GetType() == typeof(ErrResponse))
+                {
+                    data = resp.ToXmlBinary<ErrResponse>();
+                    isErr = true;
+                }
+                else
+                {
+                    data = resp.ToXmlBinary<O>();
+                }
+            }
+
             Console.Write(
                 $"[{DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)}][{path}]"); // iso-8601 timestamp
             try
@@ -47,47 +67,16 @@ namespace UConv.Server
                 switch (path)
                 {
                     case "/convert":
-                        var convReq = Request.FromData<ConvRequest>(message);
-                        var convResp = convertMethod(convReq);
-                        data = convResp.ToXmlBinary<ConvResponse>();
-                        if (convResp.GetType() == typeof(ErrResponse))
-                        {
-                            data = convResp.ToXmlBinary<ErrResponse>();
-                            isErr = true;
-                        }
-                        else
-                        {
-                            data = convResp.ToXmlBinary<ConvResponse>();
-                        }
-
+                        HandleFunc<ConvRequest, ConvResponse>(convertMethod);
                         break;
                     case "/converters":
-                        var convlReq = Request.FromData<ConvListRequest>(message);
-                        var convlResp = converterListMethod(convlReq);
-                        if (convlResp.GetType() == typeof(ErrResponse))
-                        {
-                            data = convlResp.ToXmlBinary<ErrResponse>();
-                            isErr = true;
-                        }
-                        else
-                        {
-                            data = convlResp.ToXmlBinary<ConvListResponse>();
-                        }
-
+                        HandleFunc<ConvListRequest, ConvListResponse>(converterListMethod);
                         break;
                     case "/rateme":
-                        var rateReq = Request.FromData<RateMeRequest>(message);
-                        var rateResp = rateMeMethod(rateReq);
-                        if (rateResp.GetType() == typeof(ErrResponse))
-                        {
-                            data = rateResp.ToXmlBinary<ErrResponse>();
-                            isErr = true;
-                        }
-                        else
-                        {
-                            data = rateResp.ToXmlBinary<RateMeResponse>();
-                        }
-
+                        HandleFunc<RateMeRequest, RateMeResponse>(rateMeMethod);
+                        break;
+                    case "/last_rating":
+                        HandleFunc<LastRatingRequest, LastRatingResponse>(lastRatingMethod);
                         break;
                     default:
                         var resp = new ErrResponse($"Invalid route to `{path}`");
@@ -154,18 +143,20 @@ namespace UConv.Server
                                         {
                                             context.Records.Add(new Record
                                             {
+                                                hostname = Dns.GetHostName(),
                                                 date = DateTime.Now,
                                                 converter = iconv.Name,
                                                 inputValue = val,
                                                 inputUnit = request.inputUnit,
+                                                outputValue = ret2.Item1,
                                                 outputUnit = request.outputUnit
                                             });
                                             context.SaveChanges();
                                         }
                                     }
-                                    catch (Exception e)
+                                    catch (Exception ex)
                                     {
-                                        Console.WriteLine($"Failed to save record to db - {e.Message}");
+                                        Console.WriteLine($"Failed to save record to db - {ex.Message}");
                                     }
                                 });
                                 t.Start();
@@ -217,7 +208,11 @@ namespace UConv.Server
                 {
                     using (var context = new UConvDbContext())
                     {
-                        context.AddRating(new Rating {name = request.hostname, rating = request.rating});
+                        var record = context.Ratings.First(r => r.name == request.hostname);
+                        if (record == null)
+                            context.AddRating(new Rating {name = request.hostname, rating = request.rating});
+                        else
+                            record.rating = request.rating;
                         context.SaveChanges();
                     }
                 }
@@ -229,6 +224,24 @@ namespace UConv.Server
             t.Start();
 
             return new RateMeResponse();
+        }
+
+        private Response lastRatingMethod(LastRatingRequest request)
+        {
+            try
+            {
+                using (var context = new UConvDbContext())
+                {
+                    var record = context.Ratings.First(r => r.name == request.hostname);
+                    if (record != null) return new LastRatingResponse(record.date, record.name, record.rating);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save rating to db - {ex.Message}");
+            }
+
+            return new LastRatingResponse(DateTime.Now, Dns.GetHostName(), 0);
         }
     }
 }

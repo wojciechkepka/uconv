@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace UConv.Core
 {
     public class Rating
     {
         [Key] public int id { get; set; }
+        public DateTime date { get; set; }
 
         [Required] [StringLength(100)] public string name { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace UConv.Core
+namespace UConv.Core.Db
 {
     public class UConvDbContext : DbContext
     {

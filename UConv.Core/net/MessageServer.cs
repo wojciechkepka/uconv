@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Net.Sockets;
 
-namespace UConv.Server
+namespace UConv.Core.Net
 {
-    internal class MessageServer : UTcpServer
+    public class MessageServer : UTcpServer
     {
         public delegate void MessageDelegate(NetworkStream ns, string message);
 

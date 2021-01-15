@@ -9,6 +9,8 @@ using System.Windows.Media;
 using System.Windows.Controls.Primitives;
 using UConv.Controls;
 using UConv.Core;
+using UConv.Core.Net;
+using UConv.Core.Db;
 using static UConv.Core.Units;
 
 namespace UConv.Client
@@ -276,18 +278,10 @@ namespace UConv.Client
             {
                 switch (tab)
                 {
-                    case "Converter":
-                        await getConverters();
-                        break;
-                    case "Statistics":
-                        await getStats();
-                        break;
-                    case "Settings":
-                        await getLastRating();
-                        break;
-                    case "Exchange rates":
-                        await getCurrencies();
-                        break;
+                    case "Converter": await getConverters(); break;
+                    case "Statistics": await getStats(); break;
+                    case "Settings": await getLastRating(); break;
+                    case "Exchange rates": await getCurrencies(); break;
                 }
             });
             clientThread.Start();

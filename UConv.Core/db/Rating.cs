@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace UConv.Core
+namespace UConv.Core.Db
 {
     public class Rating
     {

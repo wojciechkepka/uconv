@@ -2,11 +2,10 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using UConv.Core;
 
-namespace UConv.Client
+namespace UConv.Core.Net
 {
-    internal class UTcpClient
+    public class UTcpClient
     {
         protected readonly string Hostname;
         protected readonly int Port;

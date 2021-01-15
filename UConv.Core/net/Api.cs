@@ -5,8 +5,9 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using static UConv.Core.Units;
+using UConv.Core.Db;
 
-namespace UConv.Core
+namespace UConv.Core.Net
 {
     public enum Method
     {

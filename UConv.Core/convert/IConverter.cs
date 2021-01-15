@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UConv.Core
+namespace UConv.Core.Convert
 {
     public interface IConverter<T, U>
     {

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using UConv.Core;
+using UConv.Core.Net;
 using System.Collections.Generic;
 
 namespace UConv.Client

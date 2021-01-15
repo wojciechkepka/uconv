@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using static UConv.Core.Formulas;
 using static UConv.Core.Units;
+using static UConv.Core.Convert.Formulas;
 
-namespace UConv.Core
+namespace UConv.Core.Convert
 {
     public class MassConverter : IConverter<double, Unit>
     {

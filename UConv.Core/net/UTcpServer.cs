@@ -3,9 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace UConv.Server
+namespace UConv.Core.Net
 {
-    internal class UTcpServer
+    public class UTcpServer
     {
         public delegate void ConnectionHandlerDelegate(NetworkStream ns);
 

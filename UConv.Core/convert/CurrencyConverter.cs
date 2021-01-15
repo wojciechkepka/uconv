@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using static UConv.Core.Units;
 
-namespace UConv.Core
+namespace UConv.Core.Convert
 {
     [DataContract]
     public static class ExchangeRates

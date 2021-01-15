@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace UConv.Core
+namespace UConv.Core.Convert
 {
     public class Formulas
     {

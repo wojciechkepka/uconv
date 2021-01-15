@@ -9,8 +9,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UConv.Core.Convert;
-using UConv.Core.Net;
 using UConv.Core.Db;
+using UConv.Core.Net;
 using static UConv.Core.Units;
 
 namespace UConv.Server
@@ -220,11 +220,12 @@ namespace UConv.Server
                     {
                         var record = context.Ratings.FirstOrDefault(r => r.name == request.hostname);
                         if (record == null)
-                        { 
-                            context.AddRating(new Rating {
-                                name = request.hostname, 
+                        {
+                            context.AddRating(new Rating
+                            {
+                                name = request.hostname,
                                 rating = request.rating,
-                                date = DateTime.Now,
+                                date = DateTime.Now
                             });
                         }
                         else
@@ -232,6 +233,7 @@ namespace UConv.Server
                             record.rating = request.rating;
                             record.date = DateTime.Now;
                         }
+
                         context.SaveChanges();
                     }
                 }
@@ -280,28 +282,21 @@ namespace UConv.Server
             }
 
             return new ClearDataResponse();
-
         }
 
         private Response exchangeRatesMethod(ExchangeRateRequest request)
         {
             Dictionary<Unit, double> ret;
             if (ExchangeRates.Rates.TryGetValue(UnitFromName(request.currency), out ret))
-            {
                 return new ExchangeRateResponse(ret);
-
-            }
 
             return new ErrResponse($"Rates for specified currency `{request.currency}` not available.");
         }
 
         private Response currencyListMethod(CurrencyListRequest request)
         {
-            List<string> currencies = new List<string> { };
-            foreach(Unit u in new CurrencyConverter().SupportedUnits)
-            {
-                currencies.Add(u.ToString());
-            }
+            var currencies = new List<string>();
+            foreach (var u in new CurrencyConverter().SupportedUnits) currencies.Add(u.ToString());
 
             return new CurrencyListResponse(currencies);
         }

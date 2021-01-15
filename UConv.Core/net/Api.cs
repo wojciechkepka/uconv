@@ -4,8 +4,8 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-using static UConv.Core.Units;
 using UConv.Core.Db;
+using static UConv.Core.Units;
 
 namespace UConv.Core.Net
 {
@@ -243,7 +243,6 @@ namespace UConv.Core.Net
     [DataContract]
     public class CurrencyListRequest : Request
     {
-
         public CurrencyListRequest() : base(Method.CurrencyList)
         {
         }
@@ -253,6 +252,7 @@ namespace UConv.Core.Net
     public class CurrencyListResponse : Response
     {
         [DataMember] public List<string> currencies;
+
         public CurrencyListResponse(List<string> currencies) : base(true)
         {
             this.currencies = currencies;
@@ -262,7 +262,6 @@ namespace UConv.Core.Net
     [DataContract]
     public class StatisticsRequest : Request
     {
-
         public StatisticsRequest() : base(Method.Statistics)
         {
         }
@@ -272,10 +271,10 @@ namespace UConv.Core.Net
     public class StatisticsResponse : Response
     {
         [DataMember] public List<Record> stats;
+
         public StatisticsResponse(List<Record> stats) : base(true)
         {
             this.stats = stats;
         }
     }
-
 }

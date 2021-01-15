@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using UConv.Core;
 using UConv.Core.Net;
-using System.Collections.Generic;
 
 namespace UConv.Client
 {
@@ -12,7 +12,7 @@ namespace UConv.Client
         public readonly string Hostname;
         public readonly int Port;
         private Queue<UTcpClient> clients;
-        
+
         public UConvClient(
             string hostname,
             int port
@@ -20,7 +20,7 @@ namespace UConv.Client
         {
             Hostname = hostname;
             Port = port;
-            clients = new Queue<UTcpClient> { };
+            clients = new Queue<UTcpClient>();
         }
 
         private Response HandleRequest<I, O>(string path, Request req)
@@ -75,7 +75,7 @@ namespace UConv.Client
 
         public Response ClearDataRequest()
         {
-            return HandleRequest<ClearDataRequest, ClearDataResponse>("/clear_data", 
+            return HandleRequest<ClearDataRequest, ClearDataResponse>("/clear_data",
                 new ClearDataRequest(Dns.GetHostName()));
         }
 

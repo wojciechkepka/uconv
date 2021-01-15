@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Controls.Primitives;
 using UConv.Controls;
-using UConv.Core;
 using UConv.Core.Net;
-using UConv.Core.Db;
 using static UConv.Core.Units;
 
 namespace UConv.Client
@@ -18,9 +15,9 @@ namespace UConv.Client
     public partial class MainWindow : Window
     {
         private readonly UConvClient client;
+        private Thread clientThread;
 
         private Dictionary<string, List<Unit>> converters;
-        private Thread clientThread;
 
         public MainWindow()
         {
@@ -36,16 +33,12 @@ namespace UConv.Client
             clientThread = new Thread(async () =>
             {
                 await getConverters();
-                Dispatcher.Invoke(() =>
-                {
-                    convComboBox.ItemsSource = converters.Keys;
-                });
+                Dispatcher.Invoke(() => { convComboBox.ItemsSource = converters.Keys; });
                 await getCurrencies();
                 await getStats();
                 await getLastRating();
             });
             clientThread.Start();
-
         }
 
         private async Task getCurrencies()
@@ -60,10 +53,7 @@ namespace UConv.Client
                 else
                 {
                     var rateResp = (CurrencyListResponse) resp;
-                    Dispatcher.Invoke(() =>
-                    {
-                        currencyComboBox.ItemsSource = rateResp.currencies;
-                    });
+                    Dispatcher.Invoke(() => { currencyComboBox.ItemsSource = rateResp.currencies; });
                 }
             });
         }
@@ -96,16 +86,9 @@ namespace UConv.Client
             {
                 var resp = client.ConverterListRequest();
                 if (typeof(ErrResponse) == resp.GetType())
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        setError(((ErrResponse)resp).message);
-                    });
-                }
+                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
                 else
-                {
                     converters = ((ConvListResponse) resp).converters;
-                }
             });
         }
 
@@ -115,19 +98,9 @@ namespace UConv.Client
             {
                 var resp = client.StatisticsRequest();
                 if (typeof(ErrResponse) == resp.GetType())
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        setError(((ErrResponse)resp).message);
-                    });
-                }
+                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
                 else
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        statsDataGrid.ItemsSource = ((StatisticsResponse)resp).stats;
-                    });
-                }
+                    Dispatcher.Invoke(() => { statsDataGrid.ItemsSource = ((StatisticsResponse) resp).stats; });
             });
         }
 
@@ -215,18 +188,11 @@ namespace UConv.Client
 
         private async void clearDataButton_Click(object sender, RoutedEventArgs e)
         {
-
             await Task.Run(() =>
             {
                 var resp = client.ClearDataRequest();
                 if (typeof(ErrResponse) == resp.GetType())
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        setError(((ErrResponse)resp).message);
-                    });
-                }
-
+                    Dispatcher.Invoke(() => { setError(((ErrResponse) resp).message); });
             });
             getData();
         }
@@ -239,29 +205,36 @@ namespace UConv.Client
                 var resp = client.ExchangeRatesRequest(currencyComboBox.SelectedItem.ToString());
                 if (typeof(ErrResponse) == resp.GetType())
                 {
-                    setError(((ErrResponse)resp).message);
+                    setError(((ErrResponse) resp).message);
                     return;
                 }
 
-                var ratesResp = (ExchangeRateResponse)resp;
+                var ratesResp = (ExchangeRateResponse) resp;
                 foreach (var currency in ratesResp.rates)
                 {
-                    Grid g = new Grid { };
+                    var g = new Grid();
                     var nameCol = new ColumnDefinition();
                     nameCol.Width = new GridLength(30, GridUnitType.Star);
                     var valCol = new ColumnDefinition();
                     valCol.Width = new GridLength(70, GridUnitType.Star);
                     g.ColumnDefinitions.Add(nameCol);
                     g.ColumnDefinitions.Add(valCol);
-                    Label name = new Label { Content = $"{currency.Key}    ", FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Left};
-                    Label value = new Label { Content = currency.Value, FontStyle = FontStyles.Italic, HorizontalAlignment = HorizontalAlignment.Right };
+                    var name = new Label
+                    {
+                        Content = $"{currency.Key}    ", FontWeight = FontWeights.Bold,
+                        HorizontalAlignment = HorizontalAlignment.Left
+                    };
+                    var value = new Label
+                    {
+                        Content = currency.Value, FontStyle = FontStyles.Italic,
+                        HorizontalAlignment = HorizontalAlignment.Right
+                    };
                     name.SetValue(Grid.ColumnProperty, 0);
                     value.SetValue(Grid.ColumnProperty, 1);
                     g.Children.Add(name);
                     g.Children.Add(value);
                     currencyRateStackPanel.Children.Add(g);
                 }
-
             }
             catch (Exception ex)
             {
@@ -273,15 +246,23 @@ namespace UConv.Client
         {
             if (clientThread.IsAlive) return;
 
-            var tab = ((TabItem)mainTabControl.SelectedItem).Header;
+            var tab = ((TabItem) mainTabControl.SelectedItem).Header;
             clientThread = new Thread(async () =>
             {
                 switch (tab)
                 {
-                    case "Converter": await getConverters(); break;
-                    case "Statistics": await getStats(); break;
-                    case "Settings": await getLastRating(); break;
-                    case "Exchange rates": await getCurrencies(); break;
+                    case "Converter":
+                        await getConverters();
+                        break;
+                    case "Statistics":
+                        await getStats();
+                        break;
+                    case "Settings":
+                        await getLastRating();
+                        break;
+                    case "Exchange rates":
+                        await getCurrencies();
+                        break;
                 }
             });
             clientThread.Start();

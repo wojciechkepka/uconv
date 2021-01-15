@@ -8,7 +8,8 @@ namespace UConv.Core.Db
 
         public UConvDbContext()
         {
-            dbServerConnString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=UConv;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            dbServerConnString =
+                @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=UConv;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
         }
 
         public UConvDbContext(string server)

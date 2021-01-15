@@ -135,14 +135,14 @@
         <!-- End of Flat ComboBox -->
 
         <Style x:Key="FlatUi">
-            <Setter Property="Button.Background" Value="#34495e"></Setter>
-            <Setter Property="Button.Foreground" Value="White"></Setter>
+            <Setter Property="Button.Background" Value="#34495e" />
+            <Setter Property="Button.Foreground" Value="White" />
         </Style>
     </Window.Resources>
 
-    <Grid Style="{StaticResource FlatUi}" >
+    <Grid Style="{StaticResource FlatUi}">
         <TabControl x:Name="mainTabControl" SelectionChanged="TabControl_SelectionChanged">
-            <TabItem Header="Converter" >
+            <TabItem Header="Converter">
                 <StackPanel>
                     <Label x:Name="convLabel" Margin="20,0,0,0" FontWeight="Bold">Converter:</Label>
                     <ComboBox Style="{StaticResource ComboBoxFlatStyle}" x:Name="convComboBox" Margin="60,0,60,0"
@@ -165,8 +165,12 @@
                         </StackPanel>
                     </Grid>
                     <TextBox x:Name="userInputBox" Margin="60,15" Height="20" />
-                    <Button x:Name="convertButton" Style="{StaticResource FlatUi}" Margin="110,15" Height="30" Click="convertButton_Click" FontWeight="Bold">Convert</Button>
-                    <TextBlock x:Name="outputTextBlock" TextWrapping="Wrap" MaxWidth="350" HorizontalAlignment="Center" Margin="15" FontStyle="Italic" FontSize="20" />
+                    <Button x:Name="convertButton" Style="{StaticResource FlatUi}" Margin="110,15" Height="30"
+                            Click="convertButton_Click" FontWeight="Bold">
+                        Convert
+                    </Button>
+                    <TextBlock x:Name="outputTextBlock" TextWrapping="Wrap" MaxWidth="350" HorizontalAlignment="Center"
+                               Margin="15" FontStyle="Italic" FontSize="20" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="Exchange rates">
@@ -174,31 +178,36 @@
                     <Label x:Name="exchangeUnitLabel" Margin="20,0,0,0" FontWeight="Bold">Select currency:</Label>
                     <ComboBox Style="{StaticResource ComboBoxFlatStyle}" x:Name="currencyComboBox"
                               Margin="60,0,60,0" SelectionChanged="currencyComboBox_SelectionChanged" />
-                    <StackPanel x:Name="currencyRateStackPanel" Margin="60,20,60,0">
-                        
-                    </StackPanel>
-                </StackPanel>    
+                    <StackPanel x:Name="currencyRateStackPanel" Margin="60,20,60,0" />
+                </StackPanel>
             </TabItem>
             <TabItem Header="Statistics">
                 <StackPanel>
-                    <DataGrid x:Name="statsDataGrid" Height="300"/>
+                    <DataGrid x:Name="statsDataGrid" Height="300" />
                 </StackPanel>
             </TabItem>
             <TabItem Header="Settings">
                 <StackPanel>
-                <Grid Height="50">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0.3*" />
-                        <ColumnDefinition Width="0.7*" />
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold">Leave a rating</Label>
-                    <custom:UserRate x:Name="userRateControl" Grid.Column="1" />
-                </Grid>
+                    <Grid Height="50">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.3*" />
+                            <ColumnDefinition Width="0.7*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center"
+                               FontWeight="Bold">
+                            Leave a rating
+                        </Label>
+                        <custom:UserRate x:Name="userRateControl" Grid.Column="1" />
+                    </Grid>
 
-                    <Button x:Name="clearDataButton" Style="{StaticResource FlatUi}" Margin="120,30" Height="30" Click="clearDataButton_Click" FontWeight="Bold">Clear data</Button>
+                    <Button x:Name="clearDataButton" Style="{StaticResource FlatUi}" Margin="120,30" Height="30"
+                            Click="clearDataButton_Click" FontWeight="Bold">
+                        Clear data
+                    </Button>
                 </StackPanel>
             </TabItem>
         </TabControl>
-        <Frame Content="Frame" HorizontalAlignment="Left" Height="7" Margin="421,260,0,0" VerticalAlignment="Top" Width="6"/>
+        <Frame Content="Frame" HorizontalAlignment="Left" Height="7" Margin="421,260,0,0" VerticalAlignment="Top"
+               Width="6" />
     </Grid>
 </Window>

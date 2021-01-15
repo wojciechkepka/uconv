@@ -78,6 +78,9 @@ namespace UConv.Server
                     case "/last_rating":
                         HandleFunc<LastRatingRequest, LastRatingResponse>(lastRatingMethod);
                         break;
+                    case "/clear_data":
+                        HandleFunc<ClearDataRequest, ClearDataResponse>(clearDataMethod);
+                        break;
                     default:
                         var resp = new ErrResponse($"Invalid route to `{path}`");
                         data = resp.ToXmlBinary<Response>();
@@ -242,6 +245,25 @@ namespace UConv.Server
             }
 
             return new LastRatingResponse(DateTime.Now, Dns.GetHostName(), 0);
+        }
+
+        private Response clearDataMethod(ClearDataRequest request)
+        {
+            try
+            {
+                using (var context = new UConvDbContext())
+                {
+                    context.Ratings.RemoveRange(context.Ratings.Where(r => r.name == request.hostname));
+                    context.Records.RemoveRange(context.Records.Where(r => r.hostname == request.hostname));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to save rating to db - {ex.Message}");
+            }
+
+            return new LastRatingResponse(DateTime.Now, Dns.GetHostName(), 0);
+
         }
     }
 }

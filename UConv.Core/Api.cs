@@ -14,7 +14,8 @@ namespace UConv.Core
         Convert,
         ExchangeRate,
         SaveRating,
-        LastRating
+        LastRating,
+        ClearData,
     }
 
     [DataContract]
@@ -216,4 +217,24 @@ namespace UConv.Core
             this.rating = rating;
         }
     }
+
+    [DataContract]
+    public class ClearDataRequest : Request
+    {
+        [DataMember] public string hostname;
+
+        public ClearDataRequest(string hostname) : base(Method.ClearData)
+        {
+            this.hostname = hostname;
+        }
+    }
+
+    [DataContract]
+    public class ClearDataResponse : Response
+    {
+        public ClearDataResponse() : base(true)
+        {
+        }
+    }
+
 }

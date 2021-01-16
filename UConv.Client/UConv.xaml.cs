@@ -24,6 +24,7 @@ namespace UConv.Client
             InitializeComponent();
             client = new UConvClient(Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString(), 7001);
             getData();
+            statsDataGrid.IsReadOnly = true;
             userRateControl.UserRatingChanged += userRatingChangedHandler;
         }
 

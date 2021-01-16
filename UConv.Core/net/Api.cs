@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Xml;
 using UConv.Core.Db;
 using static UConv.Core.Units;
 
@@ -19,69 +16,6 @@ namespace UConv.Core.Net
         ClearData,
         CurrencyList,
         Statistics
-    }
-
-    [DataContract]
-    public abstract class Message
-    {
-        public static T FromData<T>(string data)
-            where T : Message
-        {
-            var ser = new DataContractSerializer(typeof(T), typeof(T).Name, "");
-            var sr = new StringReader(data);
-            var xr = new XmlTextReader(sr);
-            return (T) ser.ReadObject(xr);
-        }
-
-        public string ToXmlString<T>()
-            where T : Message
-        {
-            var ser = new DataContractSerializer(typeof(T), typeof(T).Name, "");
-            var sw = new StringWriter();
-            var xw = new XmlTextWriter(sw);
-            ser.WriteObject(xw, this);
-            return sw.ToString();
-        }
-
-        public byte[] ToXmlBinary<T>()
-            where T : Message
-        {
-            return Encoding.ASCII.GetBytes(ToXmlString<T>());
-        }
-    }
-
-    [DataContract]
-    public abstract class Request : Message
-    {
-        public Request(Method method)
-        {
-            this.method = method;
-        }
-
-        [DataMember] public Method method { get; set; }
-
-        public new static T FromData<T>(string data)
-            where T : Request
-        {
-            return Message.FromData<T>(data);
-        }
-    }
-
-    [DataContract]
-    public abstract class Response : Message
-    {
-        public Response(bool status)
-        {
-            this.status = status;
-        }
-
-        public bool status { get; set; }
-
-        public new static T FromData<T>(string data)
-            where T : Response
-        {
-            return Message.FromData<T>(data);
-        }
     }
 
     [DataContract]

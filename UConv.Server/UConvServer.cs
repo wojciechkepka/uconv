@@ -17,7 +17,7 @@ namespace UConv.Server
 {
     internal class UConvServer : MessageServer
     {
-        protected List<IConverter<double, Unit>> converters = new()
+        protected readonly List<IConverter<double, Unit>> converters = new()
         {
             new DistanceConverter(),
             new MassConverter(),
@@ -26,12 +26,19 @@ namespace UConv.Server
             new SpeedConverter()
         };
 
-        protected TimeConverter tConv = new();
-
         public UConvServer(string hostname, int port) : base(hostname, port, 500, 10)
         {
         }
 
+        public static void Main(string[] args)
+        {
+            ExchangeRates.SetRandomRates();
+            var addr = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
+            var port = 7001;
+            var server = new UConvServer(addr, port);
+            Console.WriteLine($"Listening on {addr}:{port}");
+            server.Listen();
+        }
 
         protected override void OnHandleMessage(NetworkStream ns, string message)
         {
@@ -117,71 +124,49 @@ namespace UConv.Server
             }
         }
 
-        public static void Main(string[] args)
-        {
-            ExchangeRates.SetRandomRates();
-            var addr = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
-            var port = 7001;
-            var server = new UConvServer(addr, port);
-            Console.WriteLine($"Listening on {addr}:{port}");
-            server.Listen();
-        }
-
         private Response convertMethod(ConvRequest request)
         {
             try
             {
-                switch (request.converter)
+                var val = double.Parse(request.value);
+                foreach (var iconv in converters)
                 {
-                    case "Time":
-                        var ret = tConv.Convert(
-                            request.value,
-                            TimeFormatFromString(request.inputUnit),
-                            TimeFormatFromString(request.outputUnit)
+                    if (iconv.Name == request.converter)
+                    {
+                        var ret2 = iconv.Convert(
+                            val,
+                            UnitFromName(request.inputUnit),
+                            UnitFromName(request.outputUnit)
                         );
-                        return new ConvResponse(ret.Item1);
-                    default:
-                        var val = double.Parse(request.value);
-                        foreach (var iconv in converters)
-                            if (iconv.Name == request.converter)
+                        var t = new Thread(() =>
+                        {
+                            try
                             {
-                                var ret2 = iconv.Convert(
-                                    val,
-                                    UnitFromName(request.inputUnit),
-                                    UnitFromName(request.outputUnit)
-                                );
-                                var t = new Thread(() =>
+                                using (var context = new UConvDbContext())
                                 {
-                                    try
+                                    context.Records.Add(new Record
                                     {
-                                        using (var context = new UConvDbContext())
-                                        {
-                                            context.Records.Add(new Record
-                                            {
-                                                hostname = Dns.GetHostName(),
-                                                date = DateTime.Now,
-                                                converter = iconv.Name,
-                                                inputValue = val,
-                                                inputUnit = request.inputUnit,
-                                                outputValue = ret2.Item1,
-                                                outputUnit = request.outputUnit
-                                            });
-                                            context.SaveChanges();
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Console.WriteLine($"Failed to save record to db - {ex.Message}");
-                                    }
-                                });
-                                t.Start();
-
-                                return new ConvResponse(ret2.Item1.ToString());
+                                        hostname = Dns.GetHostName(),
+                                        date = DateTime.Now,
+                                        converter = iconv.Name,
+                                        inputValue = val,
+                                        inputUnit = request.inputUnit,
+                                        outputValue = ret2.Item1,
+                                        outputUnit = request.outputUnit
+                                    });
+                                    context.SaveChanges();
+                                }
                             }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Failed to save record to db - {ex.Message}");
+                            }
+                        });
+                        t.Start();
 
-                        break;
+                        return new ConvResponse(ret2.Item1.ToString());
+                    }
                 }
-
                 return new ErrResponse($"Converter {request.converter} not found.");
             }
             catch (FormatException ex)
@@ -203,9 +188,6 @@ namespace UConv.Server
                 if (convs.ContainsKey(iconv.Name)) continue;
                 convs.Add(iconv.Name, iconv.SupportedUnits);
             }
-
-            // TODO: fixme
-            convs.Add(tConv.Name, new List<Unit>());
 
             return new ConvListResponse(convs);
         }
